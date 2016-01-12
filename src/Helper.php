@@ -1,15 +1,20 @@
 <?php
 
 /**
- * @package     TrustBackMe.Web
+ * @package     PHPUnit_Helper
  *
  * @author      Adamo Crespi <hello@aerendir.me>
- * @copyright   Copyright (C) 2012 - 2015 TrustBack.me. All rights reserved.
- * @license     SECRETED. No distribution, no copy, no derivative, no divulgation or any other activity or action that could disclose this text.
+ * @copyright   Copyright (C) 2016.
+ * @license     MIT
  */
 
 namespace SerendipityHQ\Library\PHPUnit_Helper;
 
+/**
+ * A PHPUnit helper to better manage tested resources, mocked objects and test values
+ *
+ * @package SerendipityHQ\Library\PHPUnit_Helper
+ */
 trait PHPUnit_Helper
 {
     /**
