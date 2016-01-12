@@ -17,11 +17,49 @@ namespace SerendipityHQ\Library\PHPUnit_Helper;
  */
 trait PHPUnit_Helper
 {
+    /** @var array Contains all the mocked objects */
+    private $mocks = [];
+
     /** @var object The tested resource */
     private $resource;
 
     /**
+     * Add a mock object.
+     *
+     * Use "Help" for consistency with getHelpMock.
+     *
+     * @param $id
+     * @param \PHPUnit_Framework_MockObject_MockObject $class
+     * @return $this
+     */
+    protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class)
+    {
+        $this->mocks[$id] = $class;
+
+        return $this;
+    }
+
+    /**
+     * Get a mock object.
+     *
+     * Use "Help" to avoid conflicts with PHPUnit getMock method.
+     *
+     * @param $id
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getHelpMock($id)
+    {
+        if (!isset($this->mocks[$id]))
+            throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $id));
+
+        return $this->mocks[$id];
+    }
+
+    /**
+     * Set the resource to test
+     *
      * @param object $resource The resource to test
+     * @return $this
      */
     protected function setResource($resource)
     {
@@ -29,9 +67,13 @@ trait PHPUnit_Helper
             throw new \InvalidArgumentException('A Resource has to be an Object');
 
         $this->resource = $resource;
+
+        return $this;
     }
 
     /**
+     * Get the resource to test
+     *
      * @return object The tested resource
      */
     protected function getResource()
