@@ -17,10 +17,32 @@ namespace SerendipityHQ\Library\PHPUnit_Helper;
  */
 trait PHPUnit_Helper
 {
+    /** @var object The tested resource */
+    private $resource;
+
+    /**
+     * @param object $resource The resource to test
+     */
+    protected function setResource($resource)
+    {
+        if (false === is_object($resource))
+            throw new \InvalidArgumentException('A Resource has to be an Object');
+
+        $this->resource = $resource;
+    }
+
+    /**
+     * @return object The tested resource
+     */
+    protected function getResource()
+    {
+        return $this->resource;
+    }
+
     /**
      * Sets to null all instantiated properties to freeup memory
      */
-    protected function tearDown()
+    protected function helpTearDown()
     {
         $refl = new \ReflectionObject($this);
         foreach ($refl->getProperties() as $prop) {
