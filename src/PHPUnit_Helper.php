@@ -17,11 +17,28 @@ namespace SerendipityHQ\Library\PHPUnit_Helper;
  */
 trait PHPUnit_Helper
 {
+    /** @var  array The expected values */
+    private $expectedValues = [];
+
     /** @var array Contains all the mocked objects */
     private $mocks = [];
 
     /** @var object The tested resource */
     private $resource;
+
+    /**
+     * Add an expected value
+     *
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    protected function addExpectedValue($name, $value)
+    {
+        $this->expectedValues[$name] = $value;
+
+        return $this;
+    }
 
     /**
      * Add a mock object.
@@ -32,11 +49,28 @@ trait PHPUnit_Helper
      * @param \PHPUnit_Framework_MockObject_MockObject $class
      * @return $this
      */
-    protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class)
+    protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class, $addToExpected = false)
     {
         $this->mocks[$id] = $class;
 
+        if ($addToExpected)
+            $this->addExpectedValue($id, $this->getHelpMock($id));
+
         return $this;
+    }
+
+    /**
+     * Get an expected value.
+     *
+     * @param $key
+     * @return mixed
+     */
+    public function getExpectedValue($key)
+    {
+        if (!isset($this->expectedValues[$key]))
+            throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $key));
+
+        return $this->expectedValues[$key];
     }
 
     /**
