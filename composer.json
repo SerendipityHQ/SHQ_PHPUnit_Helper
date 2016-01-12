@@ -1,0 +1,22 @@
+{
+    "name": "serendipity_hq/phpunit_helper",
+    "license": "MIT",
+    "type": "library",
+    "description": "PHPUnit helper to manage tested resource, mocked objects and test values.",
+    "keywords": ["phpunit"],
+    "homepage": "https://github.com/SerendipityHQ/SHQ_PHPUnit_Helper",
+    "authors": [
+        {
+            "name": "Adamo crespi",
+            "email": "hello@aerendir.me"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "SerendipityHQ\\Library\\PHPUnit_Helper\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
