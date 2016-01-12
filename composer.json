@@ -16,6 +16,9 @@
             "SerendipityHQ\\Library\\PHPUnit_Helper\\": "src/"
         }
     },
+    "require": {
+        "symfony/property-access": "*"
+    },
     "require-dev": {
         "phpunit/phpunit": "*"
     }

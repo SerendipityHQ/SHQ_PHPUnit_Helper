@@ -9,6 +9,7 @@
  */
 
 namespace SerendipityHQ\Library\PHPUnit_Helper;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * A PHPUnit helper to better manage tested resources, mocked objects and test values
@@ -55,6 +56,23 @@ trait PHPUnit_Helper
 
         if ($addToExpected)
             $this->addExpectedValue($id, $this->getHelpMock($id));
+
+        return $this;
+    }
+
+    /**
+     * Automatically set the properties of the Resource with expected values
+     *
+     * @return $this
+     */
+    protected function bindExpectedValuesToResource()
+    {
+        $accessor = PropertyAccess::createPropertyAccessor();
+
+        foreach ($this->expectedValues as $property => $value) {
+            if ($accessor->isReadable($this->getResource(), $property))
+                $accessor->setValue($this->resource, $property, $value);
+        }
 
         return $this;
     }
