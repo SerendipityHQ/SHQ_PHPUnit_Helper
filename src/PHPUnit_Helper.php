@@ -27,6 +27,9 @@ trait PHPUnit_Helper
     /** @var array Contains all the collections of mocked objects */
     private $mocksCollections = [];
 
+    /** @var array Contains the resources used by the test */
+    private $resources = [];
+
     /** @var object The tested resource */
     private $testingResource;
 
@@ -81,6 +84,20 @@ trait PHPUnit_Helper
 
         if ($addToExpected)
             $this->addExpectedValue($id, $this->getHelpMocksCollection($id));
+
+        return $this;
+    }
+
+    /**
+     * Add a resource to help during the test of the class
+     *
+     * @param string $name The name of the resource
+     * @param mixed $resource The resource
+     * @return $this
+     */
+    protected function addResource($name, $resource)
+    {
+        $this->resources[$name] = $resource;
 
         return $this;
     }
@@ -207,6 +224,20 @@ trait PHPUnit_Helper
     }
 
     /**
+     * Get a resource to help during testing.
+     *
+     * @param $name
+     * @return mixed
+     */
+    protected function getResource($name)
+    {
+        if (!isset($this->resources[$name]))
+            throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $name));
+
+        return $this->resources[$name];
+    }
+
+    /**
      * Removes a mock from a collection. Optionally, also from the expected values.
      *
      * @param string $mockName
@@ -238,7 +269,7 @@ trait PHPUnit_Helper
     protected function setResourceToTest($resourceToTest)
     {
         if (false === is_object($resourceToTest))
-            throw new \InvalidArgumentException('A Resource has to be an Object');
+            throw new \InvalidArgumentException(sprintf('The resource to test has to be an Object. You passed a "%s".', gettype($resourceToTest)));
 
         $this->testingResource = $resourceToTest;
 
