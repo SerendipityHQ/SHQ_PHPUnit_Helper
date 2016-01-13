@@ -75,7 +75,7 @@ This is a sample code to test an hypothetical `Order` entity:
      */
     public function testOrder()
     {
-        $this->setResource(new Order());
+        $this->setResourceToTest(new Order());
 
         $this->addHelpMocksCollection('purchase',
             $this->generateMocksCollection($this->getMock('\AppBundle\Entity\Purchase'), 3),
@@ -89,22 +89,22 @@ This is a sample code to test an hypothetical `Order` entity:
             ->addExpectedValue('completedOn', new \DateTime('2015-04-12 00:08'))
             ->bindExpectedValuesToResource();
 
-        $this->assertEquals($this->getExpectedValue('id'),          $this->getResource()->getId());
-        $this->assertEquals($this->getExpectedValue('channel'),     $this->getResource()->getChannel());
-        $this->assertEquals($this->getExpectedValue('placedBy'),    $this->getResource()->getPlacedBy());
-        $this->assertEquals($this->getExpectedValue('placedOn'),    $this->getResource()->getPlacedOn());
-        $this->assertEquals($this->getExpectedValue('modifiedOn'),  $this->getResource()->getModifiedOn());
-        $this->assertEquals($this->getExpectedValue('completedOn'), $this->getResource()->getCompletedOn());
-        $this->assertEquals($this->getExpectedValue('id'),          $this->getResource()->__toString());
-        $this->assertEquals($this->getExpectedCount('purchase'),    count($this->getResource()->getPurchases()));
+        $this->assertEquals($this->getExpectedValue('id'),          $this->getTestingResource()->getId());
+        $this->assertEquals($this->getExpectedValue('channel'),     $this->getTestingResource()->getChannel());
+        $this->assertEquals($this->getExpectedValue('placedBy'),    $this->getTestingResource()->getPlacedBy());
+        $this->assertEquals($this->getExpectedValue('placedOn'),    $this->getTestingResource()->getPlacedOn());
+        $this->assertEquals($this->getExpectedValue('modifiedOn'),  $this->getTestingResource()->getModifiedOn());
+        $this->assertEquals($this->getExpectedValue('completedOn'), $this->getTestingResource()->getCompletedOn());
+        $this->assertEquals($this->getExpectedValue('id'),          $this->getTestingResource()->__toString());
+        $this->assertEquals($this->getExpectedCount('purchase'),    count($this->getTestingResource()->getPurchases()));
 
-        $this->getResource()->removePurchase($this->removeMockFromMocksCollection(1, 'purchase'));
-        $this->assertEquals($this->getExpectedCount('purchase'), count($this->getResource()->getPurchases()));
+        $this->getTestingResource()->removePurchase($this->removeMockFromMocksCollection(1, 'purchase'));
+        $this->assertEquals($this->getExpectedCount('purchase'), count($this->getTestingResource()->getPurchases()));
     }
 
-### Using `$this->setResource()`
+### Using `$this->setResourceToTest()`
 
-Using `$this->setResource()` you can tell the helper which is the tested resource.
+Using `$this->setResourceToTest()` you can tell the helper which is the tested resource.
 Knowing this, the helper can help you to populate it after you've added some expected values.
 
 ### Using `$this->addHelpMocksCollection()` and `$this->generateMocksCollection()`
