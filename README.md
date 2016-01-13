@@ -179,7 +179,7 @@ all the methods of the helper to manage your tests.
 ## Measuring the memory usage during tests
 
 You can measure the memory usage before and after the tear down using the methods `$this->measureMemoryBeforeTearDown()` 
-`$this->printMemoryUsageInfo()`. This last method automatically calls `$this->measureMemoryAfterTearDown()` if it is not
+and `$this->printMemoryUsageInfo()`. This last method automatically calls `$this->measureMemoryAfterTearDown()` if it is not
 yet called.
 
 So you can explicitly call it in you tear down method to measure the memory usage when you best like.
