@@ -24,6 +24,9 @@ trait PHPUnit_Helper
     /** @var array Contains all the mocked objects */
     private $mocks = [];
 
+    /** @var array Contains all the collections of mocked objects */
+    private $mocksCollections = [];
+
     /** @var object The tested resource */
     private $resource;
 
@@ -52,6 +55,7 @@ trait PHPUnit_Helper
      *
      * @param $id
      * @param \PHPUnit_Framework_MockObject_MockObject $class
+     * @param bool $addToExpected Define if the mock has to be added to the expected values
      * @return $this
      */
     protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class, $addToExpected = false)
@@ -60,6 +64,23 @@ trait PHPUnit_Helper
 
         if ($addToExpected)
             $this->addExpectedValue($id, $this->getHelpMock($id));
+
+        return $this;
+    }
+
+    /**
+     * @param $id
+     * @param array $collection
+     * @param bool $addToExpected
+     * @return $this
+     */
+    protected function addHelpMocksCollection($id, array $collection, $addToExpected = false)
+    {
+
+        $this->mocksCollections[$id] = $collection;
+
+        if ($addToExpected)
+            $this->addExpectedValue($id, $this->getHelpMocksCollection($id));
 
         return $this;
     }
@@ -74,11 +95,51 @@ trait PHPUnit_Helper
         $accessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($this->expectedValues as $property => $value) {
-            if ($accessor->isReadable($this->getResource(), $property))
-                $accessor->setValue($this->resource, $property, $value);
+            if (is_array($value)) {
+                $addMethod = 'add' . ucfirst($property);
+                foreach($value as $mock)
+                    $this->resource->$addMethod($mock);
+            } else {
+                if ($accessor->isReadable($this->getResource(), $property))
+                    $accessor->setValue($this->resource, $property, $value);
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * Clone a mock object generating a collection populated with mocks of the same kind.
+     *
+     * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param int $repeatFor
+     * @return array
+     */
+    protected function generateMocksCollection(\PHPUnit_Framework_MockObject_MockObject $mock, $repeatFor = 1)
+    {
+        $collection = [];
+
+        for ($i = 1; $i <= $repeatFor; $i++)
+            $collection[] = clone($mock);
+
+        return $collection;
+    }
+
+    /**
+     * Counts the number of elements in a collection in the expected values.
+     *
+     * @param $collection
+     * @return int
+     */
+    public function getExpectedCount($collection)
+    {
+        if (!isset($this->expectedValues[$collection]))
+            throw new \InvalidArgumentException(sprintf('The required expected collection "%s" doesn\'t exist.', $collection));
+
+        if (!is_array($this->expectedValues[$collection]))
+            throw new \InvalidArgumentException(sprintf('The required expected collection "%s" isn\'t a collection but a value.', $collection));
+
+        return count($this->expectedValues[$collection]);
     }
 
     /**
@@ -98,8 +159,6 @@ trait PHPUnit_Helper
     /**
      * Get a mock object.
      *
-     * Use "Help" to avoid conflicts with PHPUnit getMock method.
-     *
      * @param $id
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
@@ -109,6 +168,65 @@ trait PHPUnit_Helper
             throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $id));
 
         return $this->mocks[$id];
+    }
+
+    /**
+     * Get a collection of mocks.
+     *
+     * Use help to av
+     * @param $id
+     * @return array
+     */
+    protected function getHelpMocksCollection($id)
+    {
+        if (!isset($this->mocksCollections[$id]))
+            throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $id));
+
+        return $this->mocksCollections[$id];
+    }
+
+    /**
+     * Get a mock from a collection.
+     *
+     * If $removeFromCollection is set to true, it also removes the mock from the collection.
+     * If the collection is in the expected values array, removes the mock from the expected values too.
+     *
+     * @param $mockName
+     * @param $collection
+     * @param $andRemove
+     */
+    protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
+    {
+        if (!isset($this->mocksCollections[$collection][$mockName]))
+            throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
+
+        if ($andRemove)
+            $this->removeMockFromMocksCollection($mockName, $collection);
+
+        return $this->mocksCollections[$collection][$mockName];
+    }
+
+    /**
+     * Removes a mock from a collection. Optionally, also from the expected values.
+     *
+     * @param string $mockName
+     * @param string $collection
+     * @param bool $fromExpectedToo If true, removes the mock also from collection in expected values
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function removeMockFromMocksCollection($mockName, $collection, $fromExpectedToo = true)
+    {
+        if (!isset($this->mocksCollections[$collection][$mockName]))
+            throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
+
+        $return = $this->mocksCollections[$collection][$mockName];
+        unset($this->mocksCollections[$collection][$mockName]);
+
+        // Remove also from expected values
+        if (isset($this->expectedValues[$collection][$mockName]) && $fromExpectedToo)
+            unset($this->expectedValues[$collection][$mockName]);
+
+        return $return;
     }
 
     /**
