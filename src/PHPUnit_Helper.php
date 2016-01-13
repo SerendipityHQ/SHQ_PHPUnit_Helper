@@ -28,7 +28,7 @@ trait PHPUnit_Helper
     private $mocksCollections = [];
 
     /** @var object The tested resource */
-    private $resource;
+    private $testingResource;
 
     private $useReflection = false;
     private $memoryAfterTearDown;
@@ -98,10 +98,10 @@ trait PHPUnit_Helper
             if (is_array($value)) {
                 $addMethod = 'add' . ucfirst($property);
                 foreach($value as $mock)
-                    $this->resource->$addMethod($mock);
+                    $this->testingResource->$addMethod($mock);
             } else {
-                if ($accessor->isReadable($this->getResource(), $property))
-                    $accessor->setValue($this->resource, $property, $value);
+                if ($accessor->isReadable($this->getTestingResource(), $property))
+                    $accessor->setValue($this->testingResource, $property, $value);
             }
         }
 
@@ -232,15 +232,15 @@ trait PHPUnit_Helper
     /**
      * Set the resource to test
      *
-     * @param object $resource The resource to test
+     * @param object $resourceToTest The resource to test
      * @return $this
      */
-    protected function setResource($resource)
+    protected function setResourceToTest($resourceToTest)
     {
-        if (false === is_object($resource))
+        if (false === is_object($resourceToTest))
             throw new \InvalidArgumentException('A Resource has to be an Object');
 
-        $this->resource = $resource;
+        $this->testingResource = $resourceToTest;
 
         return $this;
     }
@@ -250,9 +250,9 @@ trait PHPUnit_Helper
      *
      * @return object The tested resource
      */
-    protected function getResource()
+    protected function getTestingResource()
     {
-        return $this->resource;
+        return $this->testingResource;
     }
 
     /**
@@ -272,9 +272,9 @@ trait PHPUnit_Helper
             unset($refl);
         } else {
             // At least unset the helper properties
-            $this->resource       = null;
-            $this->mocks          = null;
-            $this->expectedValues = null;
+            $this->testingResource = null;
+            $this->mocks           = null;
+            $this->expectedValues  = null;
         }
     }
 
