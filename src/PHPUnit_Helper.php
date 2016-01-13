@@ -27,6 +27,9 @@ trait PHPUnit_Helper
     /** @var object The tested resource */
     private $resource;
 
+    /** @var bool If true prints the amount of memory used before and after teardown */
+    private $debug = false;
+
     /**
      * Add an expected value
      *
@@ -75,6 +78,16 @@ trait PHPUnit_Helper
         }
 
         return $this;
+    }
+
+    /**
+     * Toggle on or off the debug info displaying.
+     *
+     * @param bool $debug
+     */
+    protected function debug($debug = true)
+    {
+        $this->debug = $debug;
     }
 
     /**
@@ -138,6 +151,8 @@ trait PHPUnit_Helper
      */
     protected function helpTearDown()
     {
+        $memoryBeforeTearDown = memory_get_usage();
+
         $refl = new \ReflectionObject($this);
         foreach ($refl->getProperties() as $prop) {
             if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
@@ -145,5 +160,47 @@ trait PHPUnit_Helper
                 $prop->setValue($this, null);
             }
         }
+
+        if ($this->debug) {
+            $this->printDebugInfo($memoryBeforeTearDown);
+        }
+    }
+
+    /**
+     * Print debug info
+     *
+     * @param $memoryBeforeTearDown
+     */
+    private function printDebugInfo($memoryBeforeTearDown)
+    {
+        printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($memoryBeforeTearDown));
+        printf("\n(Memory used after tearDown(): %s)", $this->formatMemory(memory_get_usage()));
+        printf("\n(Memory saved with tearDown(): %s)\n", $this->formatMemory($memoryBeforeTearDown - memory_get_usage()));
+    }
+
+    /**
+     * Format an integer in bytes
+     *
+     * @see http://php.net/manual/en/function.memory-get-usage.php#96280
+     * @param $size
+     * @return string
+     */
+    private function formatMemory($size)
+    {
+        $isNegative = false;
+        $unit = ['b','kb','mb','gb','tb','pb'];
+
+        if (0 > $size) {
+            // This is a negative value
+            $isNegative = true;
+
+        }
+
+        $return = ($isNegative) ? '-' : '';
+
+        return $return
+        . @round(
+            abs($size)/pow(1024,($i=floor(log(abs($size),1024)))),10
+        ) . ' ' . $unit[$i];
     }
 }
