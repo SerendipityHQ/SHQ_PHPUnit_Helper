@@ -159,7 +159,7 @@ disable this behavior passing the optional third parameter and setting it to `fa
 ### Using `PHPUnit_Helper::->bindExpectedValuesToResource()`
 
 Adding expected values and calling them as the property of your class, makes you able to use the method `PHPUnit_Helper::->bindExpectedValuesToResource()`.
-This can automatically populate your set tested resource (that you set through `PHPUnit_Helper::setResurce()`) with
+This can automatically populate your set tested resource (that you set through `PHPUnit_Helper::setResource()`) with
 expected values, so you don't have to populate it manually.
 
 ## Use of the reflection to tear down the tests
