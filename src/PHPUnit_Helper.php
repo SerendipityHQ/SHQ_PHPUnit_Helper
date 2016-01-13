@@ -27,7 +27,7 @@ trait PHPUnit_Helper
     /** @var object The tested resource */
     private $resource;
 
-    private $useReflectionToTearDown = false;
+    /** @var bool If true prints the amount of memory used before and after teardown */
     private $memoryAfterTearDown = 0;
     private $memoryBeforeTearDown = 0;
 
@@ -139,10 +139,12 @@ trait PHPUnit_Helper
 
     /**
      * Sets to null all instantiated properties to freeup memory
+     *
+     * @param bool $reflection
      */
-    protected function helpTearDown()
+    protected function helpTearDown($reflection = false)
     {
-        if ($this->useReflectionToTearDown) {
+        if ($reflection) {
             $refl = new \ReflectionObject($this);
             foreach ($refl->getProperties() as $prop) {
                 if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
@@ -160,27 +162,11 @@ trait PHPUnit_Helper
         }
     }
 
-    /**
-     * Toggle on or off the use of reflection
-     *
-     * @param bool $useReflection
-     */
-    protected function useReflectionToTearDown($useReflection = true)
-    {
-        $this->useReflectionToTearDown = $useReflection;
-    }
-
-    /**
-     * Measure the memory usage before the tear down
-     */
     public function measureMemoryAfterTearDown()
     {
         $this->memoryAfterTearDown = memory_get_usage();
     }
 
-    /**
-     * Measure the memory usage after tear down
-     */
     public function measureMemoryBeforeTearDown()
     {
         $this->memoryBeforeTearDown = memory_get_usage();
@@ -191,10 +177,10 @@ trait PHPUnit_Helper
      */
     public function printMemoryUsageInfo()
     {
-        if (null === $this->memoryBeforeTearDown)
+        if (0 === $this->memoryBeforeTearDown)
             throw new \BadMethodCallException('To use measurement features you need to call PHPUnit_Helper::measureMemoryBeforeTearDown() first.');
 
-        if (null === $this->memoryAfterTearDown)
+        if (0 === $this->memoryAfterTearDown)
             $this->measureMemoryAfterTearDown();
 
         printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($this->memoryBeforeTearDown));
@@ -211,6 +197,7 @@ trait PHPUnit_Helper
      */
     private function formatMemory($size)
     {
+        var_dump($size);
         $isNegative = false;
         $unit = ['b','kb','mb','gb','tb','pb'];
 
