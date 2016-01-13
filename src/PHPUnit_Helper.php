@@ -27,7 +27,7 @@ trait PHPUnit_Helper
     /** @var object The tested resource */
     private $resource;
 
-    /** @var bool If true prints the amount of memory used before and after teardown */
+    private $useReflectionToTearDown = false;
     private $memoryAfterTearDown = 0;
     private $memoryBeforeTearDown = 0;
 
@@ -139,12 +139,10 @@ trait PHPUnit_Helper
 
     /**
      * Sets to null all instantiated properties to freeup memory
-     *
-     * @param bool $reflection Decide if the reflection has to be used to do the tear down.
      */
-    protected function helpTearDown($reflection = false)
+    protected function helpTearDown()
     {
-        if ($reflection) {
+        if ($this->useReflectionToTearDown) {
             $refl = new \ReflectionObject($this);
             foreach ($refl->getProperties() as $prop) {
                 if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
@@ -162,11 +160,27 @@ trait PHPUnit_Helper
         }
     }
 
+    /**
+     * Toggle on or off the use of reflection
+     *
+     * @param bool $useReflection
+     */
+    protected function useReflectionToTearDown($useReflection = true)
+    {
+        $this->useReflectionToTearDown = $useReflection;
+    }
+
+    /**
+     * Measure the memory usage before the tear down
+     */
     public function measureMemoryAfterTearDown()
     {
         $this->memoryAfterTearDown = memory_get_usage();
     }
 
+    /**
+     * Measure the memory usage after tear down
+     */
     public function measureMemoryBeforeTearDown()
     {
         $this->memoryBeforeTearDown = memory_get_usage();
