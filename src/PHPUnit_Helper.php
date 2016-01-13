@@ -197,7 +197,6 @@ trait PHPUnit_Helper
      */
     private function formatMemory($size)
     {
-        var_dump($size);
         $isNegative = false;
         $unit = ['b','kb','mb','gb','tb','pb'];
 
