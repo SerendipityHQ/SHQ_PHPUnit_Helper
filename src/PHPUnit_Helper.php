@@ -28,7 +28,8 @@ trait PHPUnit_Helper
     private $resource;
 
     /** @var bool If true prints the amount of memory used before and after teardown */
-    private $debug = false;
+    private $memoryAfterTearDown = 0;
+    private $memoryBeforeTearDown = 0;
 
     /**
      * Add an expected value
@@ -78,16 +79,6 @@ trait PHPUnit_Helper
         }
 
         return $this;
-    }
-
-    /**
-     * Toggle on or off the debug info displaying.
-     *
-     * @param bool $debug
-     */
-    protected function debug($debug = true)
-    {
-        $this->debug = $debug;
     }
 
     /**
@@ -148,34 +139,53 @@ trait PHPUnit_Helper
 
     /**
      * Sets to null all instantiated properties to freeup memory
+     *
+     * @param bool $reflection Decide if the reflection has to be used to do the tear down.
      */
-    protected function helpTearDown()
+    protected function helpTearDown($reflection = false)
     {
-        $memoryBeforeTearDown = memory_get_usage();
-
-        $refl = new \ReflectionObject($this);
-        foreach ($refl->getProperties() as $prop) {
-            if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
-                $prop->setAccessible(true);
-                $prop->setValue($this, null);
+        if ($reflection) {
+            $refl = new \ReflectionObject($this);
+            foreach ($refl->getProperties() as $prop) {
+                if (!$prop->isStatic() && 0 !== strpos($prop->getDeclaringClass()->getName(), 'PHPUnit_')) {
+                    $prop->setAccessible(true);
+                    $prop->setValue($this, null);
+                }
             }
-        }
-
-        if ($this->debug) {
-            $this->printDebugInfo($memoryBeforeTearDown);
+            $refl = null;
+            unset($refl);
+        } else {
+            // At least unset the helper properties
+            $this->resource       = null;
+            $this->mocks          = null;
+            $this->expectedValues = null;
         }
     }
 
-    /**
-     * Print debug info
-     *
-     * @param $memoryBeforeTearDown
-     */
-    private function printDebugInfo($memoryBeforeTearDown)
+    public function measureMemoryAfterTearDown()
     {
-        printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($memoryBeforeTearDown));
-        printf("\n(Memory used after tearDown(): %s)", $this->formatMemory(memory_get_usage()));
-        printf("\n(Memory saved with tearDown(): %s)\n", $this->formatMemory($memoryBeforeTearDown - memory_get_usage()));
+        $this->memoryAfterTearDown = memory_get_usage();
+    }
+
+    public function measureMemoryBeforeTearDown()
+    {
+        $this->memoryBeforeTearDown = memory_get_usage();
+    }
+
+    /**
+     * Print memory usage info
+     */
+    public function printMemoryUsageInfo()
+    {
+        if (null === $this->memoryBeforeTearDown)
+            throw new \BadMethodCallException('To use measurement features you need to call PHPUnit_Helper::measureMemoryBeforeTearDown() first.');
+
+        if (null === $this->memoryAfterTearDown)
+            $this->measureMemoryAfterTearDown();
+
+        printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($this->memoryBeforeTearDown));
+        printf("\n(Memory used after tearDown(): %s)", $this->formatMemory($this->memoryAfterTearDown));
+        printf("\n(Memory saved with tearDown(): %s)\n", $this->formatMemory($this->memoryBeforeTearDown - $this->memoryAfterTearDown));
     }
 
     /**
