@@ -28,8 +28,8 @@ trait PHPUnit_Helper
     private $resource;
 
     /** @var bool If true prints the amount of memory used before and after teardown */
-    private $memoryAfterTearDown = 0;
-    private $memoryBeforeTearDown = 0;
+    private $memoryAfterTearDown;
+    private $memoryBeforeTearDown;
 
     /**
      * Add an expected value
@@ -177,10 +177,10 @@ trait PHPUnit_Helper
      */
     public function printMemoryUsageInfo()
     {
-        if (0 === $this->memoryBeforeTearDown)
+        if (null === $this->memoryBeforeTearDown)
             throw new \BadMethodCallException('To use measurement features you need to call PHPUnit_Helper::measureMemoryBeforeTearDown() first.');
 
-        if (0 === $this->memoryAfterTearDown)
+        if (null === $this->memoryAfterTearDown)
             $this->measureMemoryAfterTearDown();
 
         printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($this->memoryBeforeTearDown));
