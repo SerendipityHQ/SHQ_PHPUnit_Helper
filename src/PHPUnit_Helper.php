@@ -303,9 +303,11 @@ trait PHPUnit_Helper
             unset($refl);
         } else {
             // At least unset the helper properties
-            $this->testingResource = null;
-            $this->mocks           = null;
-            $this->expectedValues  = null;
+            $this->expectedValues   = null;
+            $this->testingResource  = null;
+            $this->mocks            = null;
+            $this->mocksCollections = null;
+            $this->resources        = null;
         }
     }
 
