@@ -12,7 +12,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 /**
  * A PHPUnit helper to better manage tested resources, mocked objects and test values.
  */
-trait PHPUnit_Helper
+trait PHPUnitHelper
 {
     /** @var  array The expected values */
     private $expectedValues = [];
