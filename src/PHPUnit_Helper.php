@@ -395,8 +395,10 @@ trait PHPUnit_Helper
         $return = ($isNegative) ? '-' : '';
 
         return $return
-        .@round(
-            abs($size) / pow(1024, ($i = floor(log(abs($size), 1024)))), 10
-        ).' '.$unit[$i];
+        . round(
+            abs($size) / pow(1024, ($i = floor(log(abs($size), 1024)))), 2
+        )
+        . ' '
+        . $unit[$i];
     }
 }
