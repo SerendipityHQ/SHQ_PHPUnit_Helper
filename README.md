@@ -5,7 +5,7 @@
 [![Code Climate](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/badges/gpa.svg)](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper)
 [![Test Coverage](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/badges/coverage.svg)](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/coverage)
 [![Issue Count](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/badges/issue_count.svg)](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper)
-[![StyleCI](https://styleci.io/repos/49512498/shield)
+[![StyleCI](https://styleci.io/repos/49512498/shield)]
 
 # SHQ_PHPUnit_Helper
 
