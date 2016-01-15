@@ -1,20 +1,16 @@
 <?php
 
 /**
- * @package     PHPUnit_Helper
- *
  * @author      Adamo Crespi <hello@aerendir.me>
  * @copyright   Copyright (C) 2016.
  * @license     MIT
  */
-
 namespace SerendipityHQ\Library\PHPUnit_Helper;
+
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
- * A PHPUnit helper to better manage tested resources, mocked objects and test values
- *
- * @package SerendipityHQ\Library\PHPUnit_Helper
+ * A PHPUnit helper to better manage tested resources, mocked objects and test values.
  */
 trait PHPUnit_Helper
 {
@@ -38,10 +34,11 @@ trait PHPUnit_Helper
     private $memoryBeforeTearDown;
 
     /**
-     * Add an expected value
+     * Add an expected value.
      *
      * @param $name
      * @param $value
+     *
      * @return $this
      */
     protected function addExpectedValue($name, $value)
@@ -58,15 +55,17 @@ trait PHPUnit_Helper
      *
      * @param $id
      * @param \PHPUnit_Framework_MockObject_MockObject $class
-     * @param bool $addToExpected Define if the mock has to be added to the expected values
+     * @param bool                                     $addToExpected Define if the mock has to be added to the expected values
+     *
      * @return $this
      */
     protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class, $addToExpected = false)
     {
         $this->mocks[$id] = $class;
 
-        if ($addToExpected)
+        if ($addToExpected) {
             $this->addExpectedValue($id, $this->getHelpMock($id));
+        }
 
         return $this;
     }
@@ -74,25 +73,27 @@ trait PHPUnit_Helper
     /**
      * @param $id
      * @param array $collection
-     * @param bool $addToExpected
+     * @param bool  $addToExpected
+     *
      * @return $this
      */
     protected function addHelpMocksCollection($id, array $collection, $addToExpected = false)
     {
-
         $this->mocksCollections[$id] = $collection;
 
-        if ($addToExpected)
+        if ($addToExpected) {
             $this->addExpectedValue($id, $this->getHelpMocksCollection($id));
+        }
 
         return $this;
     }
 
     /**
-     * Add a resource to help during the test of the class
+     * Add a resource to help during the test of the class.
      *
-     * @param string $name The name of the resource
-     * @param mixed $resource The resource
+     * @param string $name     The name of the resource
+     * @param mixed  $resource The resource
+     *
      * @return $this
      */
     protected function addResource($name, $resource)
@@ -103,7 +104,7 @@ trait PHPUnit_Helper
     }
 
     /**
-     * Automatically set the properties of the Resource with expected values
+     * Automatically set the properties of the Resource with expected values.
      *
      * @return $this
      */
@@ -113,12 +114,14 @@ trait PHPUnit_Helper
 
         foreach ($this->expectedValues as $property => $value) {
             if (is_array($value)) {
-                $addMethod = 'add' . ucfirst($property);
-                foreach($value as $mock)
+                $addMethod = 'add'.ucfirst($property);
+                foreach ($value as $mock) {
                     $this->testingResource->$addMethod($mock);
+                }
             } else {
-                if ($accessor->isReadable($this->getTestingResource(), $property))
+                if ($accessor->isReadable($this->getTestingResource(), $property)) {
                     $accessor->setValue($this->testingResource, $property, $value);
+                }
             }
         }
 
@@ -129,15 +132,17 @@ trait PHPUnit_Helper
      * Clone a mock object generating a collection populated with mocks of the same kind.
      *
      * @param \PHPUnit_Framework_MockObject_MockObject $mock
-     * @param int $repeatFor
+     * @param int                                      $repeatFor
+     *
      * @return array
      */
     protected function generateMocksCollection(\PHPUnit_Framework_MockObject_MockObject $mock, $repeatFor = 1)
     {
         $collection = [];
 
-        for ($i = 1; $i <= $repeatFor; $i++)
-            $collection[] = clone($mock);
+        for ($i = 1; $i <= $repeatFor; $i++) {
+            $collection[] = clone $mock;
+        }
 
         return $collection;
     }
@@ -146,15 +151,18 @@ trait PHPUnit_Helper
      * Counts the number of elements in a collection in the expected values.
      *
      * @param $collection
+     *
      * @return int
      */
     public function getExpectedCount($collection)
     {
-        if (!isset($this->expectedValues[$collection]))
+        if (!isset($this->expectedValues[$collection])) {
             throw new \InvalidArgumentException(sprintf('The required expected collection "%s" doesn\'t exist.', $collection));
+        }
 
-        if (!is_array($this->expectedValues[$collection]))
+        if (!is_array($this->expectedValues[$collection])) {
             throw new \InvalidArgumentException(sprintf('The required expected collection "%s" isn\'t a collection but a value.', $collection));
+        }
 
         return count($this->expectedValues[$collection]);
     }
@@ -163,12 +171,14 @@ trait PHPUnit_Helper
      * Get an expected value.
      *
      * @param $key
+     *
      * @return mixed
      */
     public function getExpectedValue($key)
     {
-        if (!isset($this->expectedValues[$key]))
+        if (!isset($this->expectedValues[$key])) {
             throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $key));
+        }
 
         return $this->expectedValues[$key];
     }
@@ -177,12 +187,14 @@ trait PHPUnit_Helper
      * Get a mock object.
      *
      * @param $id
+     *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     protected function getHelpMock($id)
     {
-        if (!isset($this->mocks[$id]))
+        if (!isset($this->mocks[$id])) {
             throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $id));
+        }
 
         return $this->mocks[$id];
     }
@@ -191,13 +203,16 @@ trait PHPUnit_Helper
      * Get a collection of mocks.
      *
      * Use help to av
+     *
      * @param $id
+     *
      * @return array
      */
     protected function getHelpMocksCollection($id)
     {
-        if (!isset($this->mocksCollections[$id]))
+        if (!isset($this->mocksCollections[$id])) {
             throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $id));
+        }
 
         return $this->mocksCollections[$id];
     }
@@ -214,11 +229,13 @@ trait PHPUnit_Helper
      */
     protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
     {
-        if (!isset($this->mocksCollections[$collection][$mockName]))
+        if (!isset($this->mocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
+        }
 
-        if ($andRemove)
+        if ($andRemove) {
             $this->removeMockFromMocksCollection($mockName, $collection);
+        }
 
         return $this->mocksCollections[$collection][$mockName];
     }
@@ -227,12 +244,14 @@ trait PHPUnit_Helper
      * Get a resource to help during testing.
      *
      * @param $name
+     *
      * @return mixed
      */
     protected function getResource($name)
     {
-        if (!isset($this->resources[$name]))
+        if (!isset($this->resources[$name])) {
             throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $name));
+        }
 
         return $this->resources[$name];
     }
@@ -242,34 +261,39 @@ trait PHPUnit_Helper
      *
      * @param string $mockName
      * @param string $collection
-     * @param bool $fromExpectedToo If true, removes the mock also from collection in expected values
+     * @param bool   $fromExpectedToo If true, removes the mock also from collection in expected values
+     *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     protected function removeMockFromMocksCollection($mockName, $collection, $fromExpectedToo = true)
     {
-        if (!isset($this->mocksCollections[$collection][$mockName]))
+        if (!isset($this->mocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
+        }
 
         $return = $this->mocksCollections[$collection][$mockName];
         unset($this->mocksCollections[$collection][$mockName]);
 
         // Remove also from expected values
-        if (isset($this->expectedValues[$collection][$mockName]) && $fromExpectedToo)
+        if (isset($this->expectedValues[$collection][$mockName]) && $fromExpectedToo) {
             unset($this->expectedValues[$collection][$mockName]);
+        }
 
         return $return;
     }
 
     /**
-     * Set the resource to test
+     * Set the resource to test.
      *
      * @param object $resourceToTest The resource to test
+     *
      * @return $this
      */
     protected function setResourceToTest($resourceToTest)
     {
-        if (false === is_object($resourceToTest))
+        if (false === is_object($resourceToTest)) {
             throw new \InvalidArgumentException(sprintf('The resource to test has to be an Object. You passed a "%s".', gettype($resourceToTest)));
+        }
 
         $this->testingResource = $resourceToTest;
 
@@ -277,7 +301,7 @@ trait PHPUnit_Helper
     }
 
     /**
-     * Get the resource to test
+     * Get the resource to test.
      *
      * @return object The tested resource
      */
@@ -287,7 +311,7 @@ trait PHPUnit_Helper
     }
 
     /**
-     * Sets to null all instantiated properties to freeup memory
+     * Sets to null all instantiated properties to freeup memory.
      */
     protected function helpTearDown()
     {
@@ -303,11 +327,11 @@ trait PHPUnit_Helper
             unset($refl);
         } else {
             // At least unset the helper properties
-            $this->expectedValues   = null;
-            $this->testingResource  = null;
-            $this->mocks            = null;
+            $this->expectedValues = null;
+            $this->testingResource = null;
+            $this->mocks = null;
             $this->mocksCollections = null;
-            $this->resources        = null;
+            $this->resources = null;
         }
     }
 
@@ -322,15 +346,17 @@ trait PHPUnit_Helper
     }
 
     /**
-     * Print memory usage info
+     * Print memory usage info.
      */
     public function printMemoryUsageInfo()
     {
-        if (null === $this->memoryBeforeTearDown)
+        if (null === $this->memoryBeforeTearDown) {
             throw new \BadMethodCallException('To use measurement features you need to call PHPUnit_Helper::measureMemoryBeforeTearDown() first.');
+        }
 
-        if (null === $this->memoryAfterTearDown)
+        if (null === $this->memoryAfterTearDown) {
             $this->measureMemoryAfterTearDown();
+        }
 
         printf("\n(Memory used before tearDown(): %s)", $this->formatMemory($this->memoryBeforeTearDown));
         printf("\n(Memory used after tearDown(): %s)", $this->formatMemory($this->memoryAfterTearDown));
@@ -348,28 +374,29 @@ trait PHPUnit_Helper
     }
 
     /**
-     * Format an integer in bytes
+     * Format an integer in bytes.
      *
      * @see http://php.net/manual/en/function.memory-get-usage.php#96280
+     *
      * @param $size
+     *
      * @return string
      */
     private function formatMemory($size)
     {
         $isNegative = false;
-        $unit = ['b','kb','mb','gb','tb','pb'];
+        $unit = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
 
         if (0 > $size) {
             // This is a negative value
             $isNegative = true;
-
         }
 
         $return = ($isNegative) ? '-' : '';
 
         return $return
-        . @round(
-            abs($size)/pow(1024,($i=floor(log(abs($size),1024)))),10
-        ) . ' ' . $unit[$i];
+        .@round(
+            abs($size) / pow(1024, ($i = floor(log(abs($size), 1024)))), 10
+        ).' '.$unit[$i];
     }
 }
