@@ -1,6 +1,6 @@
 [![Latest Stable Version](https://poser.pugx.org/serendipity_hq/phpunit_helper/v/stable)](https://packagist.org/packages/serendipity_hq/phpunit_helper)
+[![Build Status](https://travis-ci.org/SerendipityHQ/SHQ_PHPUnit_Helper.svg?branch=master)](https://travis-ci.org/SerendipityHQ/SHQ_PHPUnit_Helper)
 [![Total Downloads](https://poser.pugx.org/serendipity_hq/phpunit_helper/downloads)](https://packagist.org/packages/serendipity_hq/phpunit_helper)
-[![Latest Unstable Version](https://poser.pugx.org/serendipity_hq/phpunit_helper/v/unstable)](https://packagist.org/packages/serendipity_hq/phpunit_helper)
 [![License](https://poser.pugx.org/serendipity_hq/phpunit_helper/license)](https://packagist.org/packages/serendipity_hq/phpunit_helper)
 [![Code Climate](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/badges/gpa.svg)](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper)
 [![Test Coverage](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/badges/coverage.svg)](https://codeclimate.com/github/SerendipityHQ/SHQ_PHPUnit_Helper/coverage)
