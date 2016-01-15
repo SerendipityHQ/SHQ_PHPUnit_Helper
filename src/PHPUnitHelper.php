@@ -395,10 +395,10 @@ trait PHPUnitHelper
         $return = ($isNegative) ? '-' : '';
 
         return $return
-        . round(
+        .round(
             abs($size) / pow(1024, ($i = floor(log(abs($size), 1024)))), 2
         )
-        . ' '
-        . $unit[$i];
+        .' '
+        .$unit[$i];
     }
 }
