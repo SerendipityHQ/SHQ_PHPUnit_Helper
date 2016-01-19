@@ -80,14 +80,15 @@ trait PHPUnitHelper
      * @param $id
      * @param array $collection
      * @param bool  $addToExpected
-     * @param bool   $overwrite Defines if a resource can be overwritten or not
+     * @param bool  $overwrite     Defines if a resource can be overwritten or not
      *
      * @return $this
      */
     protected function addHelpMocksCollection($id, array $collection, $addToExpected = false, $overwrite = false)
     {
-        if (isset($this->helpMocksCollections[$id]) && false === $overwrite)
+        if (isset($this->helpMocksCollections[$id]) && false === $overwrite) {
             throw new \LogicException('The Mocks Collection you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
+        }
 
         $this->helpMocksCollections[$id] = $collection;
 
@@ -126,8 +127,8 @@ trait PHPUnitHelper
      * Add a value used in tests.
      *
      * @param string $id
-     * @param mixed $value
-     * @param bool $addToExpected Define if the mock has to be added to the expected values
+     * @param mixed  $value
+     * @param bool   $addToExpected Define if the mock has to be added to the expected values
      * @param $overwrite bool If false, the result isn't overwritten
      *
      * @return $this
@@ -138,8 +139,9 @@ trait PHPUnitHelper
             throw new \LogicException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $id));
         }
 
-        if (isset($this->helpValues[$id]) && false === $overwrite)
+        if (isset($this->helpValues[$id]) && false === $overwrite) {
             throw new \LogicException('The HelpValue you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
+        }
 
         $this->helpValues[$id] = $value;
 
@@ -279,6 +281,7 @@ trait PHPUnitHelper
 
     /**
      * @param $id
+     *
      * @return mixed
      */
     protected function getHelpValue($id)
