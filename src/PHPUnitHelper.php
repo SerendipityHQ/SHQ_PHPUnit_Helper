@@ -27,7 +27,7 @@ trait PHPUnitHelper
     private $resources = [];
 
     /** @var mixed The result of the test */
-    private $result;
+    private $helpResult;
 
     /** @var object The tested resource */
     private $testingResource;
@@ -294,13 +294,13 @@ trait PHPUnitHelper
      *
      * @return mixed
      */
-    protected function getResult()
+    protected function getHelpResult()
     {
-        if (null === $this->result) {
+        if (null === $this->helpResult) {
             throw new \LogicException('Before you can call getResult(), you have to set a result with setResult().');
         }
 
-        return $this->result;
+        return $this->helpResult;
     }
 
     /**
@@ -311,13 +311,13 @@ trait PHPUnitHelper
      * @param $result
      * @param $overwrite bool If false, the result isn't overwritten
      */
-    protected function setResult($result, $overwrite = false)
+    protected function setHelpResult($result, $overwrite = false)
     {
-        if (null !== $this->result && false === $overwrite) {
+        if (null !== $this->helpResult && false === $overwrite) {
             throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
         }
 
-        $this->result = $result;
+        $this->helpResult = $result;
     }
 
     /**
@@ -395,7 +395,7 @@ trait PHPUnitHelper
             $this->mocks = null;
             $this->mocksCollections = null;
             $this->resources = null;
-            $this->result = null;
+            $this->helpResult = null;
             $this->testingResource = null;
             $this->values = null;
         }
