@@ -166,7 +166,7 @@ Using a collection makes you able to use the methods `PHPUnit_Helper::getExpecte
 By default `PHPUnit_Helper::removeMockFromMocksCollection()` also removes the mock from the expected values, but you can
 disable this behavior passing the optional third parameter and setting it to `false`.
 
-### Using `PHPUnit_Helper::->bindExpectedValuesToResource()`
+### Using `PHPUnit_Helper::bindExpectedValuesToResource()`
 
 Adding expected values and calling them as the property of your class, makes you able to use the method `PHPUnit_Helper::->bindExpectedValuesToResource()`.
 This can automatically populate your set tested resource (that you set through `PHPUnit_Helper::setResource()`) with
