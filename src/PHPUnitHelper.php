@@ -309,9 +309,14 @@ trait PHPUnitHelper
      * This not allows method chaining.
      *
      * @param $result
+     * @param $overwrite bool If false, the result isn't overwritten
      */
-    protected function setResult($result)
+    protected function setResult($result, $overwrite = false)
     {
+        if (null !== $this->result && false === $overwrite) {
+            throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
+        }
+
         $this->result = $result;
     }
 
