@@ -136,7 +136,7 @@ trait PHPUnitHelper
     protected function addHelpValue($id, $value, $addToExpected = false, $overwrite = false)
     {
         if (is_object($value)) {
-            throw new \LogicException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $id));
+            throw new \InvalidArgumentException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $id));
         }
 
         if (isset($this->helpValues[$id]) && false === $overwrite) {
