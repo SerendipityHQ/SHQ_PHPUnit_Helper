@@ -80,10 +80,11 @@ trait PHPUnitHelper
      * @param $id
      * @param array $collection
      * @param bool  $addToExpected
+     * @param bool   $overwrite Defines if a resource can be overwritten or not
      *
      * @return $this
      */
-    protected function addHelpMocksCollection($id, array $collection, $addToExpected = false, $overwrite)
+    protected function addHelpMocksCollection($id, array $collection, $addToExpected = false, $overwrite = false)
     {
         if (isset($this->helpMocksCollections[$id]) && false === $overwrite)
             throw new \LogicException('The Mocks Collection you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
