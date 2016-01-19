@@ -77,47 +77,6 @@ trait PHPUnitHelper
     }
 
     /**
-     * Add a value used in tests.
-     *
-     * @param string $id
-     * @param mixed $value
-     * @param bool $addToExpected Define if the mock has to be added to the expected values
-     *
-     * @return $this
-     */
-    protected function addHelpValue($id, $value, $addToExpected = false)
-    {
-        if ($value instanceof \PHPUnit_Framework_MockObject_MockObject) {
-            throw new \LogicException('The HelpValue with ID "%s" you are trying to add is a mock object. Use $this->addHelpMock() instead.', $id);
-        }
-
-        if ($addToExpected) {
-            $this->addExpectedValue($id, $this->getHelpValue($id));
-        }
-
-        if (isset($this->helpValues[$id])) {
-            throw new \LogicException('Another HelpValue with ID "%s" is already set.', $id);
-        }
-
-        $this->helpValues[$id] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param $id
-     * @return mixed
-     */
-    protected function getHelpValue($id)
-    {
-        if (!isset($this->helpValues[$id])) {
-            throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $id));
-        }
-
-        return $this->helpValues[$id];
-    }
-
-    /**
      * @param $id
      * @param array $collection
      * @param bool  $addToExpected
@@ -155,6 +114,34 @@ trait PHPUnitHelper
         }
 
         $this->helpResources[$id] = $resource;
+
+        return $this;
+    }
+
+    /**
+     * Add a value used in tests.
+     *
+     * @param string $id
+     * @param mixed $value
+     * @param bool $addToExpected Define if the mock has to be added to the expected values
+     *
+     * @return $this
+     */
+    protected function addHelpValue($id, $value, $addToExpected = false)
+    {
+        if ($value instanceof \PHPUnit_Framework_MockObject_MockObject) {
+            throw new \LogicException('The HelpValue with ID "%s" you are trying to add is a mock object. Use $this->addHelpMock() instead.', $id);
+        }
+
+        if ($addToExpected) {
+            $this->addExpectedValue($id, $this->getHelpValue($id));
+        }
+
+        if (isset($this->helpValues[$id])) {
+            throw new \LogicException('Another HelpValue with ID "%s" is already set.', $id);
+        }
+
+        $this->helpValues[$id] = $value;
 
         return $this;
     }
@@ -206,17 +193,17 @@ trait PHPUnitHelper
     /**
      * Get an expected value.
      *
-     * @param $key
+     * @param $id
      *
      * @return mixed
      */
-    public function getExpected($key)
+    public function getExpected($id)
     {
-        if (!isset($this->areExpected[$key])) {
-            throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $key));
+        if (!isset($this->areExpected[$id])) {
+            throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $id));
         }
 
-        return $this->areExpected[$key];
+        return $this->areExpected[$id];
     }
 
     /**
@@ -254,29 +241,6 @@ trait PHPUnitHelper
     }
 
     /**
-     * Get a mock from a collection.
-     *
-     * If $removeFromCollection is set to true, it also removes the mock from the collection.
-     * If the collection is in the expected values array, removes the mock from the expected values too.
-     *
-     * @param $mockName
-     * @param $collection
-     * @param $andRemove
-     */
-    protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
-    {
-        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
-            throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
-        }
-
-        if ($andRemove) {
-            $this->removeMockFromMocksCollection($mockName, $collection);
-        }
-
-        return $this->helpMocksCollections[$collection][$mockName];
-    }
-
-    /**
      * Get a resource to help during testing.
      *
      * @param $id
@@ -309,20 +273,49 @@ trait PHPUnitHelper
     }
 
     /**
-     * The result of the test.
-     *
-     * This not allows method chaining.
-     *
-     * @param $result
-     * @param $overwrite bool If false, the result isn't overwritten
+     * @param $id
+     * @return mixed
      */
-    protected function setHelpResult($result, $overwrite = false)
+    protected function getHelpValue($id)
     {
-        if (null !== $this->helpResult && false === $overwrite) {
-            throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
+        if (!isset($this->helpValues[$id])) {
+            throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $id));
         }
 
-        $this->helpResult = $result;
+        return $this->helpValues[$id];
+    }
+
+    /**
+     * Get a mock from a collection.
+     *
+     * If $removeFromCollection is set to true, it also removes the mock from the collection.
+     * If the collection is in the expected values array, removes the mock from the expected values too.
+     *
+     * @param $mockName
+     * @param $collection
+     * @param $andRemove
+     */
+    protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
+    {
+        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
+            throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
+        }
+
+        if ($andRemove) {
+            $this->removeMockFromMocksCollection($mockName, $collection);
+        }
+
+        return $this->helpMocksCollections[$collection][$mockName];
+    }
+
+    /**
+     * Get the resource to test.
+     *
+     * @return object The tested resource
+     */
+    protected function getObjectToTest()
+    {
+        return $this->objectToTest;
     }
 
     /**
@@ -352,6 +345,23 @@ trait PHPUnitHelper
     }
 
     /**
+     * The result of the test.
+     *
+     * This not allows method chaining.
+     *
+     * @param $result
+     * @param $overwrite bool If false, the result isn't overwritten
+     */
+    protected function setHelpResult($result, $overwrite = false)
+    {
+        if (null !== $this->helpResult && false === $overwrite) {
+            throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
+        }
+
+        $this->helpResult = $result;
+    }
+
+    /**
      * Set the resource to test.
      *
      * @param object $objectToTest The resource to test
@@ -367,16 +377,6 @@ trait PHPUnitHelper
         $this->objectToTest = $objectToTest;
 
         return $this;
-    }
-
-    /**
-     * Get the resource to test.
-     *
-     * @return object The tested resource
-     */
-    protected function getObjectToTest()
-    {
-        return $this->objectToTest;
     }
 
     /**
