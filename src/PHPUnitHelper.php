@@ -15,25 +15,25 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 trait PHPUnitHelper
 {
     /** @var  array The expected values */
-    private $expectedValues = [];
+    private $areExpected = [];
 
     /** @var array Contains all the mocked objects */
-    private $mocks = [];
+    private $helpMocks = [];
 
     /** @var array Contains all the collections of mocked objects */
-    private $mocksCollections = [];
+    private $helpMocksCollections = [];
 
     /** @var array Contains the resources used by the test */
-    private $resources = [];
+    private $helpResources = [];
 
     /** @var mixed The result of the test */
     private $helpResult;
 
     /** @var object The tested resource */
-    private $testingResource;
+    private $objectToTest;
 
     /** @var array Contains the help values */
-    private $values = [];
+    private $helpValues = [];
 
     private $useReflection = false;
     private $memoryAfterTearDown;
@@ -47,9 +47,9 @@ trait PHPUnitHelper
      *
      * @return $this
      */
-    protected function addExpectedValue($name, $value)
+    private function addExpectedValue($name, $value)
     {
-        $this->expectedValues[$name] = $value;
+        $this->areExpected[$name] = $value;
 
         return $this;
     }
@@ -67,7 +67,7 @@ trait PHPUnitHelper
      */
     protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class, $addToExpected = false)
     {
-        $this->mocks[$id] = $class;
+        $this->helpMocks[$id] = $class;
 
         if ($addToExpected) {
             $this->addExpectedValue($id, $this->getHelpMock($id));
@@ -79,22 +79,27 @@ trait PHPUnitHelper
     /**
      * Add a value used in tests.
      *
-     * @param $id
-     * @param $value
+     * @param string $id
+     * @param mixed $value
+     * @param bool $addToExpected Define if the mock has to be added to the expected values
      *
      * @return $this
      */
-    protected function addHelpValue($id, $value)
+    protected function addHelpValue($id, $value, $addToExpected = false)
     {
         if ($value instanceof \PHPUnit_Framework_MockObject_MockObject) {
             throw new \LogicException('The HelpValue with ID "%s" you are trying to add is a mock object. Use $this->addHelpMock() instead.', $id);
         }
 
-        if (isset($this->values[$id])) {
+        if ($addToExpected) {
+            $this->addExpectedValue($id, $this->getHelpValue($id));
+        }
+
+        if (isset($this->helpValues[$id])) {
             throw new \LogicException('Another HelpValue with ID "%s" is already set.', $id);
         }
 
-        $this->values[$id] = $value;
+        $this->helpValues[$id] = $value;
 
         return $this;
     }
@@ -105,11 +110,11 @@ trait PHPUnitHelper
      */
     protected function getHelpValue($id)
     {
-        if (!isset($this->values[$id])) {
+        if (!isset($this->helpValues[$id])) {
             throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $id));
         }
 
-        return $this->values[$id];
+        return $this->helpValues[$id];
     }
 
     /**
@@ -121,7 +126,7 @@ trait PHPUnitHelper
      */
     protected function addHelpMocksCollection($id, array $collection, $addToExpected = false)
     {
-        $this->mocksCollections[$id] = $collection;
+        $this->helpMocksCollections[$id] = $collection;
 
         if ($addToExpected) {
             $this->addExpectedValue($id, $this->getHelpMocksCollection($id));
@@ -133,15 +138,15 @@ trait PHPUnitHelper
     /**
      * Add a resource to help during the test of the class.
      *
-     * @param string $id      The name of the resource
+     * @param string $id        The name of the resource
      * @param mixed  $resource  The resource
      * @param bool   $overwrite Defines if a resource can be overwritten or not
      *
      * @return $this
      */
-    protected function addResource($id, $resource, $overwrite = false)
+    protected function addHelpResource($id, $resource, $overwrite = false)
     {
-        if (isset($this->resources[$id]) && false === $overwrite) {
+        if (isset($this->helpResources[$id]) && false === $overwrite) {
             throw new \LogicException('The resource you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
         }
 
@@ -149,7 +154,7 @@ trait PHPUnitHelper
             throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addResource() accepts only objects. Use addHelpValue() to store other kind of values.', $id));
         }
 
-        $this->resources[$id] = $resource;
+        $this->helpResources[$id] = $resource;
 
         return $this;
     }
@@ -159,19 +164,19 @@ trait PHPUnitHelper
      *
      * @return $this
      */
-    protected function bindExpectedValuesToResource()
+    protected function bindExpectedToObjectToTest()
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
-        foreach ($this->expectedValues as $property => $value) {
+        foreach ($this->areExpected as $property => $value) {
             if (is_array($value)) {
                 $addMethod = 'add'.ucfirst($property);
                 foreach ($value as $mock) {
-                    $this->testingResource->$addMethod($mock);
+                    $this->getObjectToTest()->$addMethod($mock);
                 }
             } else {
-                if ($accessor->isWritable($this->getTestingResource(), $property)) {
-                    $accessor->setValue($this->testingResource, $property, $value);
+                if ($accessor->isWritable($this->getObjectToTest(), $property)) {
+                    $accessor->setValue($this->getObjectToTest(), $property, $value);
                 }
             }
         }
@@ -205,13 +210,13 @@ trait PHPUnitHelper
      *
      * @return mixed
      */
-    public function getExpectedValue($key)
+    public function getExpected($key)
     {
-        if (!isset($this->expectedValues[$key])) {
+        if (!isset($this->areExpected[$key])) {
             throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $key));
         }
 
-        return $this->expectedValues[$key];
+        return $this->areExpected[$key];
     }
 
     /**
@@ -223,11 +228,11 @@ trait PHPUnitHelper
      */
     protected function getHelpMock($id)
     {
-        if (!isset($this->mocks[$id])) {
+        if (!isset($this->helpMocks[$id])) {
             throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $id));
         }
 
-        return $this->mocks[$id];
+        return $this->helpMocks[$id];
     }
 
     /**
@@ -241,11 +246,11 @@ trait PHPUnitHelper
      */
     protected function getHelpMocksCollection($id)
     {
-        if (!isset($this->mocksCollections[$id])) {
+        if (!isset($this->helpMocksCollections[$id])) {
             throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $id));
         }
 
-        return $this->mocksCollections[$id];
+        return $this->helpMocksCollections[$id];
     }
 
     /**
@@ -260,7 +265,7 @@ trait PHPUnitHelper
      */
     protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
     {
-        if (!isset($this->mocksCollections[$collection][$mockName])) {
+        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
         }
 
@@ -268,23 +273,23 @@ trait PHPUnitHelper
             $this->removeMockFromMocksCollection($mockName, $collection);
         }
 
-        return $this->mocksCollections[$collection][$mockName];
+        return $this->helpMocksCollections[$collection][$mockName];
     }
 
     /**
      * Get a resource to help during testing.
      *
-     * @param $name
+     * @param $id
      *
      * @return mixed
      */
-    protected function getResource($name)
+    protected function getHelpResource($id)
     {
-        if (!isset($this->resources[$name])) {
-            throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $name));
+        if (!isset($this->helpResources[$id])) {
+            throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $id));
         }
 
-        return $this->resources[$name];
+        return $this->helpResources[$id];
     }
 
     /**
@@ -331,16 +336,16 @@ trait PHPUnitHelper
      */
     protected function removeMockFromMocksCollection($mockName, $collection, $fromExpectedToo = true)
     {
-        if (!isset($this->mocksCollections[$collection][$mockName])) {
+        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
         }
 
-        $return = $this->mocksCollections[$collection][$mockName];
-        unset($this->mocksCollections[$collection][$mockName]);
+        $return = $this->helpMocksCollections[$collection][$mockName];
+        unset($this->helpMocksCollections[$collection][$mockName]);
 
         // Remove also from expected values
-        if (isset($this->expectedValues[$collection][$mockName]) && $fromExpectedToo) {
-            unset($this->expectedValues[$collection][$mockName]);
+        if (isset($this->areExpected[$collection][$mockName]) && $fromExpectedToo) {
+            unset($this->areExpected[$collection][$mockName]);
         }
 
         return $return;
@@ -349,17 +354,17 @@ trait PHPUnitHelper
     /**
      * Set the resource to test.
      *
-     * @param object $resourceToTest The resource to test
+     * @param object $objectToTest The resource to test
      *
      * @return $this
      */
-    protected function setResourceToTest($resourceToTest)
+    protected function setObjectToTest($objectToTest)
     {
-        if (false === is_object($resourceToTest)) {
-            throw new \InvalidArgumentException(sprintf('The resource to test has to be an Object. You passed a "%s".', gettype($resourceToTest)));
+        if (false === is_object($objectToTest)) {
+            throw new \InvalidArgumentException(sprintf('The resource to test has to be an Object. You passed a "%s".', gettype($objectToTest)));
         }
 
-        $this->testingResource = $resourceToTest;
+        $this->objectToTest = $objectToTest;
 
         return $this;
     }
@@ -369,9 +374,9 @@ trait PHPUnitHelper
      *
      * @return object The tested resource
      */
-    protected function getTestingResource()
+    protected function getObjectToTest()
     {
-        return $this->testingResource;
+        return $this->objectToTest;
     }
 
     /**
@@ -391,13 +396,13 @@ trait PHPUnitHelper
             unset($refl);
         } else {
             // At least unset the helper properties
-            $this->expectedValues = null;
-            $this->mocks = null;
-            $this->mocksCollections = null;
-            $this->resources = null;
+            $this->areExpected = null;
+            $this->helpMocks = null;
+            $this->helpMocksCollections = null;
+            $this->helpResources = null;
             $this->helpResult = null;
-            $this->testingResource = null;
-            $this->values = null;
+            $this->objectToTest = null;
+            $this->helpValues = null;
         }
     }
 
