@@ -141,10 +141,6 @@ trait PHPUnitHelper
         if (isset($this->helpValues[$id]) && false === $overwrite)
             throw new \LogicException('The HelpValue you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
 
-        if (isset($this->helpValues[$id])) {
-            throw new \LogicException('Another HelpValue with ID "%s" is already set.', $id);
-        }
-
         $this->helpValues[$id] = $value;
 
         if ($addToExpected) {
