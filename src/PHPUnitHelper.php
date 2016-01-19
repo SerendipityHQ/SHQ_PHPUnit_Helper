@@ -29,6 +29,9 @@ trait PHPUnitHelper
     /** @var object The tested resource */
     private $testingResource;
 
+    /** @var array Contains the help values */
+    private $values = [];
+
     private $useReflection = false;
     private $memoryAfterTearDown;
     private $memoryBeforeTearDown;
@@ -71,6 +74,42 @@ trait PHPUnitHelper
     }
 
     /**
+     * Add a value used in tests.
+     *
+     * @param $id
+     * @param $value
+     *
+     * @return $this
+     */
+    protected function addHelpValue($id, $value)
+    {
+        if ($value instanceof \PHPUnit_Framework_MockObject_MockObject) {
+            throw new \LogicException('The HelpValue with ID "%s" you are trying to add is a mock object. Use $this->addHelpMock() instead.', $id);
+        }
+
+        if (isset($this->values[$id])) {
+            throw new \LogicException('Another HelpValue with ID "%s" is already set.', $id);
+        }
+
+        $this->values[$id] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    protected function getHelpValue($id)
+    {
+        if (!isset($this->values[$id])) {
+            throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $id));
+        }
+
+        return $this->values[$id];
+    }
+
+    /**
      * @param $id
      * @param array $collection
      * @param bool  $addToExpected
@@ -95,9 +134,13 @@ trait PHPUnitHelper
      * @param mixed  $resource The resource
      *
      * @return $this
+     *
+     * @deprecated
      */
     protected function addResource($name, $resource)
     {
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 5.1.2 and will be removed in 6.0.0. Use $this->addHelpValue() instead.', E_USER_DEPRECATED);
+
         $this->resources[$name] = $resource;
 
         return $this;
@@ -226,9 +269,13 @@ trait PHPUnitHelper
      * @param $name
      *
      * @return mixed
+     *
+     * @deprecated
      */
     protected function getResource($name)
     {
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 5.1.2 and will be removed in 6.0.0. Use $this->getHelpValue() instead.', E_USER_DEPRECATED);
+
         if (!isset($this->resources[$name])) {
             throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $name));
         }
