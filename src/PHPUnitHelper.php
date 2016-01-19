@@ -26,6 +26,9 @@ trait PHPUnitHelper
     /** @var array Contains the resources used by the test */
     private $resources = [];
 
+    /** @var mixed The result of the test */
+    private $result;
+
     /** @var object The tested resource */
     private $testingResource;
 
@@ -281,6 +284,34 @@ trait PHPUnitHelper
         }
 
         return $this->resources[$name];
+    }
+
+    /**
+     * The result of the test.
+     *
+     * For example, the output of a command, or the crawler object of a request.
+     *
+     * @return mixed
+     */
+    protected function getResult()
+    {
+        if (null === $this->result) {
+            throw new \LogicException('Before you can call getResult(), you have to set a result with setResult().');
+        }
+
+        return $this->result;
+    }
+
+    /**
+     * The result of the test.
+     *
+     * This not allows method chaining.
+     *
+     * @param $result
+     */
+    protected function setResult($result)
+    {
+        $this->result = $result;
     }
 
     /**
