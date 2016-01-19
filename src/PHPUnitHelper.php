@@ -137,13 +137,9 @@ trait PHPUnitHelper
      * @param mixed  $resource The resource
      *
      * @return $this
-     *
-     * @deprecated
      */
     protected function addResource($name, $resource)
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 5.1.2 and will be removed in 6.0.0. Use $this->addHelpValue() instead.', E_USER_DEPRECATED);
-
         $this->resources[$name] = $resource;
 
         return $this;
@@ -272,13 +268,9 @@ trait PHPUnitHelper
      * @param $name
      *
      * @return mixed
-     *
-     * @deprecated
      */
     protected function getResource($name)
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 5.1.2 and will be removed in 6.0.0. Use $this->getHelpValue() instead.', E_USER_DEPRECATED);
-
         if (!isset($this->resources[$name])) {
             throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $name));
         }
