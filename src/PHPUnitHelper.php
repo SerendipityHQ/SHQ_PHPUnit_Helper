@@ -133,14 +133,23 @@ trait PHPUnitHelper
     /**
      * Add a resource to help during the test of the class.
      *
-     * @param string $name     The name of the resource
-     * @param mixed  $resource The resource
+     * @param string $id      The name of the resource
+     * @param mixed  $resource  The resource
+     * @param bool   $overwrite Defines if a resource can be overwritten or not
      *
      * @return $this
      */
-    protected function addResource($name, $resource)
+    protected function addResource($id, $resource, $overwrite = false)
     {
-        $this->resources[$name] = $resource;
+        if (isset($this->resources[$id]) && false === $overwrite) {
+            throw new \LogicException('The resource you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+        }
+
+        if (false === is_object(($resource))) {
+            throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addResource() accepts only objects. Use addHelpValue() to store other kind of values.', $id));
+        }
+
+        $this->resources[$id] = $resource;
 
         return $this;
     }
