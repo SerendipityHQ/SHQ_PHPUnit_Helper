@@ -148,26 +148,6 @@ trait PHPUnitHelper
     }
 
     /**
-     * Counts the number of elements in a collection in the expected values.
-     *
-     * @param $collection
-     *
-     * @return int
-     */
-    public function getExpectedCount($collection)
-    {
-        if (!isset($this->expectedValues[$collection])) {
-            throw new \InvalidArgumentException(sprintf('The required expected collection "%s" doesn\'t exist.', $collection));
-        }
-
-        if (!is_array($this->expectedValues[$collection])) {
-            throw new \InvalidArgumentException(sprintf('The required expected collection "%s" isn\'t a collection but a value.', $collection));
-        }
-
-        return count($this->expectedValues[$collection]);
-    }
-
-    /**
      * Get an expected value.
      *
      * @param $key
