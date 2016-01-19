@@ -171,7 +171,8 @@ trait PHPUnitHelper
                 }
             } else {
                 if ($accessor->isWritable($this->getObjectToTest(), $property)) {
-                    $accessor->setValue($this->getObjectToTest(), $property, $value);
+                    // Use direct access to property to avoid "only variables should be passed by reference"
+                    $accessor->setValue($this->objectToTest, $property, $value);
                 }
             }
         }
