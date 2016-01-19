@@ -392,10 +392,12 @@ trait PHPUnitHelper
         } else {
             // At least unset the helper properties
             $this->expectedValues = null;
-            $this->testingResource = null;
             $this->mocks = null;
             $this->mocksCollections = null;
             $this->resources = null;
+            $this->result = null;
+            $this->testingResource = null;
+            $this->values = null;
         }
     }
 
