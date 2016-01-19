@@ -119,7 +119,7 @@ trait PHPUnitHelper
                     $this->testingResource->$addMethod($mock);
                 }
             } else {
-                if ($accessor->isReadable($this->getTestingResource(), $property)) {
+                if ($accessor->isWritable($this->getTestingResource(), $property)) {
                     $accessor->setValue($this->testingResource, $property, $value);
                 }
             }
