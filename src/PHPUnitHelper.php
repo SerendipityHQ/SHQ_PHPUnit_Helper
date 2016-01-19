@@ -134,8 +134,8 @@ trait PHPUnitHelper
      */
     protected function addHelpValue($id, $value, $addToExpected = false, $overwrite = false)
     {
-        if ($value instanceof \PHPUnit_Framework_MockObject_MockObject) {
-            throw new \LogicException(sprintf('The HelpValue with ID "%s" you are trying to add is a mock object. Use $this->addHelpMock() instead.', $id));
+        if (is_object($value)) {
+            throw new \LogicException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $id));
         }
 
         if (isset($this->helpValues[$id]) && false === $overwrite)
