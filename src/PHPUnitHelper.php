@@ -26,9 +26,6 @@ trait PHPUnitHelper
     /** @var array Contains all the mocked objects */
     private $helpMocks = [];
 
-    /** @var array Contains all the collections of mocked objects */
-    private $helpMocksCollections = [];
-
     /** @var array Contains the resources used by the test */
     private $helpResources = [];
 
@@ -44,17 +41,18 @@ trait PHPUnitHelper
     private $useReflection = false;
     private $memoryAfterTearDown;
     private $memoryBeforeTearDown;
-
+    
     /**
      * @param $key
      * @param \PHPUnit_Framework_MockObject_MockObject $mock
-     * @param bool $overwrite
      * @return $this
      */
-    protected function addExpectedMock($key, \PHPUnit_Framework_MockObject_MockObject $mock, $overwrite = false)
+    protected function addExpectedMock($key, \PHPUnit_Framework_MockObject_MockObject $mock)
     {
-        if (isset($this->expectedMocks[$key]) && false === $overwrite) {
-            throw new \LogicException('The expected mock you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+        if (isset($this->expectedMocks[$key]) || isset($this->expectedMocksCollections[$key]) || isset($this->expectedValues[$key])) {
+            throw new \LogicException(
+                sprintf('The expected mock "%s" you are trying to add is already set as mock, mock collection or value.', $key)
+            );
         }
 
         $this->expectedMocks[$key] = $mock;
@@ -69,8 +67,19 @@ trait PHPUnitHelper
      */
     protected function addExpectedMocksCollection($key, array $collection)
     {
-        if (isset($this->helpMocksCollections[$key])) {
-            throw new \LogicException('The Mocks Collection you are trying to add is already set.');
+        if (isset($this->expectedMocks[$key]) || isset($this->expectedMocksCollections[$key]) || isset($this->expectedValues[$key])) {
+            throw new \LogicException(
+                sprintf('The expected mocks collection "%s" you are trying to add is already set as mock, mock collection or value.', $key)
+            );
+        }
+
+        foreach ($collection as $mock)
+        {
+            if (false === $mock instanceof \PHPUnit_Framework_MockObject_MockObject) {
+                throw new \InvalidArgumentException(
+                    sprintf('One of the elements in the mocks collection "%s" is not a mock object.', $key)
+                );
+            }
         }
 
         $this->expectedMocksCollections[$key] = $collection;
@@ -83,14 +92,15 @@ trait PHPUnitHelper
      *
      * @param $key
      * @param $value
-     * @param $overwrite
      *
      * @return $this
      */
-    protected function addExpectedValue($key, $value, $overwrite = false)
+    protected function addExpectedValue($key, $value)
     {
-        if (isset($this->expectedValues[$key]) && false === $overwrite) {
-            throw new \LogicException('The expected value you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+        if (isset($this->expectedMocks[$key]) || isset($this->expectedMocksCollections[$key]) || isset($this->expectedValues[$key])) {
+            throw new \LogicException(
+                sprintf('The expected value "%s" you are trying to add is already set as mock, mock collection or value.', $key)
+            );
         }
         
         if (is_object($value)) {
@@ -143,18 +153,9 @@ trait PHPUnitHelper
      */
     protected function addHelpMocksCollection($key, array $collection, $addToExpected = false, $overwrite = false)
     {
-        if (isset($this->helpMocksCollections[$key]) && false === $overwrite) {
-            throw new \LogicException('The Mocks Collection you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
-        }
+        @trigger_error('The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.', E_USER_DEPRECATED);
 
-        $this->helpMocksCollections[$key] = $collection;
-
-        if ($addToExpected) {
-            @trigger_error('The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.', E_USER_DEPRECATED);
-            $this->addExpectedMocksCollection($key, $this->helpMocksCollections[$key]);
-        }
-
-        return $this;
+        return $this->addExpectedMocksCollection($key, $this->expectedMocksCollections[$key]);
     }
 
     /**
@@ -222,7 +223,9 @@ trait PHPUnitHelper
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
-        foreach ($this->expectedValues as $property => $value) {
+        $values = array_merge($this->expectedValues, $this->expectedMocks, $this->expectedMocksCollections);
+
+        foreach ($values as $property => $value) {
             if (is_array($value)) {
                 $addMethod = 'add'.ucfirst($property);
                 foreach ($value as $mock) {
@@ -235,6 +238,10 @@ trait PHPUnitHelper
                 }
             }
         }
+
+        // Tear down
+        unset($values);
+        unset($accessor);
 
         return $this;
     }
@@ -357,10 +364,6 @@ trait PHPUnitHelper
      */
     protected function getHelpMocksCollection($key)
     {
-        if (!isset($this->helpMocksCollections[$key])) {
-            throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $key));
-        }
-
         @trigger_error('The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.', E_USER_DEPRECATED);
 
         return $this->getExpectedMocksCollection($key);
@@ -548,7 +551,7 @@ trait PHPUnitHelper
             // At least unset the helper properties
             $this->expectedValues = null;
             $this->helpMocks = null;
-            $this->helpMocksCollections = null;
+            $this->expectedMocksCollections = null;
             $this->helpResources = null;
             $this->actualResult = null;
             $this->objectToTest = null;
