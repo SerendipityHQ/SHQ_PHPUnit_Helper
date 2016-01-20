@@ -144,11 +144,11 @@ trait PHPUnitHelper
     protected function addHelpResource($key, $resource)
     {
         if (isset($this->helpResources[$key])) {
-            throw new \LogicException('The resource you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+            throw new \LogicException('The resource you are trying to add is already set.');
         }
 
         if (false === is_object(($resource))) {
-            throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addResource() accepts only objects. Use addHelpValue() to store other kind of values.', $key));
+            throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addHelpResource() accepts only objects. Use addHelpValue() to store other kind of values.', $key));
         }
 
         $this->helpResources[$key] = $resource;
