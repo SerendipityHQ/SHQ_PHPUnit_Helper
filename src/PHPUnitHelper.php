@@ -14,8 +14,14 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 trait PHPUnitHelper
 {
+    /** @var  array The expected mocks */
+    private $expectedMocks = [];
+
+    /** @var  array Contains the expected collection of mock objects */
+    private $expectedMocksCollections = [];
+    
     /** @var  array The expected values */
-    private $areExpected = [];
+    private $expectedValues = [];
 
     /** @var array Contains all the mocked objects */
     private $helpMocks = [];
@@ -27,7 +33,7 @@ trait PHPUnitHelper
     private $helpResources = [];
 
     /** @var mixed The result of the test */
-    private $helpResult;
+    private $actualResult;
 
     /** @var object The tested resource */
     private $objectToTest;
@@ -40,16 +46,58 @@ trait PHPUnitHelper
     private $memoryBeforeTearDown;
 
     /**
+     * @param $key
+     * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param bool $overwrite
+     * @return $this
+     */
+    protected function addExpectedMock($key, \PHPUnit_Framework_MockObject_MockObject $mock, $overwrite = false)
+    {
+        if (isset($this->expectedMocks[$key]) && false === $overwrite) {
+            throw new \LogicException('The expected mock you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+        }
+
+        $this->expectedMocks[$key] = $mock;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param array $collection
+     * @return $this
+     */
+    protected function addExpectedMocksCollection($key, array $collection)
+    {
+        if (isset($this->helpMocksCollections[$key])) {
+            throw new \LogicException('The Mocks Collection you are trying to add is already set.');
+        }
+
+        $this->expectedMocksCollections[$key] = $collection;
+
+        return $this;
+    }
+    
+    /**
      * Add an expected value.
      *
-     * @param $name
+     * @param $key
      * @param $value
+     * @param $overwrite
      *
      * @return $this
      */
-    private function addExpectedValue($name, $value)
+    protected function addExpectedValue($key, $value, $overwrite = false)
     {
-        $this->areExpected[$name] = $value;
+        if (isset($this->expectedValues[$key]) && false === $overwrite) {
+            throw new \LogicException('The expected value you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
+        }
+        
+        if (is_object($value)) {
+            throw new \InvalidArgumentException('The expected value you are trying to add is an object. Use addExpectedMock() instead.');
+        }
+
+        $this->expectedValues[$key] = $value;
 
         return $this;
     }
@@ -59,41 +107,51 @@ trait PHPUnitHelper
      *
      * Use "Help" for consistency with getHelpMock.
      *
-     * @param $id
-     * @param \PHPUnit_Framework_MockObject_MockObject $class
+     * @param $key
+     * @param \PHPUnit_Framework_MockObject_MockObject $mock
      * @param bool                                     $addToExpected Define if the mock has to be added to the expected values
      *
      * @return $this
+     *
+     * @deprecated The third parameter is deprecated and will be removed in version 7. Use addExpectedMock() instead.
      */
-    protected function addHelpMock($id, \PHPUnit_Framework_MockObject_MockObject $class, $addToExpected = false)
+    protected function addHelpMock($key, \PHPUnit_Framework_MockObject_MockObject $mock, $addToExpected = false)
     {
-        $this->helpMocks[$id] = $class;
+        if (isset($this->helpMocks[$key])) {
+            throw new \LogicException('The help mock you are trying to add is already set.');
+        }
+        
+        $this->helpMocks[$key] = $mock;
 
         if ($addToExpected) {
-            $this->addExpectedValue($id, $this->getHelpMock($id));
+            @trigger_error('The third parameter is deprecated and will be removed in version 7. Use addExpectedMock() instead.', E_USER_DEPRECATED);
+            $this->addExpectedMock($key, $this->getHelpMock($key));
         }
 
         return $this;
     }
 
     /**
-     * @param $id
+     * @param $key
      * @param array $collection
      * @param bool  $addToExpected
      * @param bool  $overwrite     Defines if a resource can be overwritten or not
      *
      * @return $this
+     * 
+     * @deprecated The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.
      */
-    protected function addHelpMocksCollection($id, array $collection, $addToExpected = false, $overwrite = false)
+    protected function addHelpMocksCollection($key, array $collection, $addToExpected = false, $overwrite = false)
     {
-        if (isset($this->helpMocksCollections[$id]) && false === $overwrite) {
+        if (isset($this->helpMocksCollections[$key]) && false === $overwrite) {
             throw new \LogicException('The Mocks Collection you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
         }
 
-        $this->helpMocksCollections[$id] = $collection;
+        $this->helpMocksCollections[$key] = $collection;
 
         if ($addToExpected) {
-            $this->addExpectedValue($id, $this->getHelpMocksCollection($id));
+            @trigger_error('The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.', E_USER_DEPRECATED);
+            $this->addExpectedMocksCollection($key, $this->helpMocksCollections[$key]);
         }
 
         return $this;
@@ -102,23 +160,23 @@ trait PHPUnitHelper
     /**
      * Add a resource to help during the test of the class.
      *
-     * @param string $id        The name of the resource
+     * @param string $key        The name of the resource
      * @param mixed  $resource  The resource
      * @param bool   $overwrite Defines if a resource can be overwritten or not
      *
      * @return $this
      */
-    protected function addHelpResource($id, $resource, $overwrite = false)
+    protected function addHelpResource($key, $resource, $overwrite = false)
     {
-        if (isset($this->helpResources[$id]) && false === $overwrite) {
+        if (isset($this->helpResources[$key]) && false === $overwrite) {
             throw new \LogicException('The resource you are trying to add is already set. Set the third parameter to "true" to overwrite it.');
         }
 
         if (false === is_object(($resource))) {
-            throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addResource() accepts only objects. Use addHelpValue() to store other kind of values.', $id));
+            throw new \InvalidArgumentException(sprintf('The resource "%s" you are trying to add is not an object. addResource() accepts only objects. Use addHelpValue() to store other kind of values.', $key));
         }
 
-        $this->helpResources[$id] = $resource;
+        $this->helpResources[$key] = $resource;
 
         return $this;
     }
@@ -126,27 +184,30 @@ trait PHPUnitHelper
     /**
      * Add a value used in tests.
      *
-     * @param string $id
+     * @param string $key
      * @param mixed  $value
      * @param bool   $addToExpected Define if the mock has to be added to the expected values
      * @param $overwrite bool If false, the result isn't overwritten
      *
      * @return $this
+     *
+     * @deprecated The second parameter $addToExpected will be removed in version 7
      */
-    protected function addHelpValue($id, $value, $addToExpected = false, $overwrite = false)
+    protected function addHelpValue($key, $value, $addToExpected = false, $overwrite = false)
     {
         if (is_object($value)) {
-            throw new \InvalidArgumentException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $id));
+            throw new \InvalidArgumentException(sprintf('The HelpValue with ID "%s" you are trying to add is an object. Use $this->addHelpMock() instead.', $key));
         }
 
-        if (isset($this->helpValues[$id]) && false === $overwrite) {
+        if (isset($this->helpValues[$key]) && false === $overwrite) {
             throw new \LogicException('The HelpValue you are trying to add is already set. Set the fourth parameter to "true" to overwrite it.');
         }
 
-        $this->helpValues[$id] = $value;
+        $this->helpValues[$key] = $value;
 
         if ($addToExpected) {
-            $this->addExpectedValue($id, $this->getHelpValue($id));
+            @trigger_error('The second parameter $addToExpected is deprecated and will be removed in version 7. Use addExpectedValue() instead.', @E_USER_DEPRECATED);
+            $this->addExpectedValue($key, $this->getHelpValue($key));
         }
 
         return $this;
@@ -161,7 +222,7 @@ trait PHPUnitHelper
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
-        foreach ($this->areExpected as $property => $value) {
+        foreach ($this->expectedValues as $property => $value) {
             if (is_array($value)) {
                 $addMethod = 'add'.ucfirst($property);
                 foreach ($value as $mock) {
@@ -198,35 +259,89 @@ trait PHPUnitHelper
     }
 
     /**
-     * Get an expected value.
+     * The result of the test.
      *
-     * @param $id
+     * For example, the output of a command, or the crawler object of a request.
      *
      * @return mixed
      */
-    public function getExpected($id)
+    protected function getActualResult()
     {
-        if (!isset($this->areExpected[$id])) {
-            throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $id));
+        if (null === $this->actualResult) {
+            throw new \LogicException('Before you can call getActualResult(), you have to set a result with setActualResult().');
         }
 
-        return $this->areExpected[$id];
+        return $this->actualResult;
+    }
+
+    /**
+     * Get an expected value.
+     *
+     * @param $key
+     *
+     * @return mixed
+     *
+     * @deprecated This method is deprecated and will be removed in version 7. Use getExpectedValue() or getExpectedMock() instead.
+     */
+    public function getExpected($key)
+    {
+        @trigger_error('This method is deprecated and will be removed in version 7. Use getExpectedValue() or getExpectedMock() instead.', E_USER_DEPRECATED);
+        $this->getExpectedValue($key);
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    protected function getExpectedMock($key)
+    {
+        if (!isset($this->expectedMocks[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required expected mock "%s" doesn\'t exist.', $key));
+        }
+
+        return $this->expectedMocks[$key];
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    protected function getExpectedMocksCollection($key)
+    {
+        if (!isset($this->expectedMocksCollections[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required expected mocks collection "%s" doesn\'t exist.', $key));
+        }
+
+        return $this->expectedMocksCollections[$key];
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    protected function getExpectedValue($key)
+    {
+        if (!isset($this->expectedValues[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required expected value "%s" doesn\'t exist.', $key));
+        }
+
+        return $this->expectedValues[$key];
     }
 
     /**
      * Get a mock object.
      *
-     * @param $id
+     * @param $key
      *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getHelpMock($id)
+    protected function getHelpMock($key)
     {
-        if (!isset($this->helpMocks[$id])) {
-            throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $id));
+        if (!isset($this->helpMocks[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required mock object "%s" doesn\'t exist.', $key));
         }
 
-        return $this->helpMocks[$id];
+        return $this->helpMocks[$key];
     }
 
     /**
@@ -234,33 +349,37 @@ trait PHPUnitHelper
      *
      * Use help to av
      *
-     * @param $id
+     * @param $key
      *
      * @return array
+     *
+     * @deprecated The method getHelpMocksCollection is deprecated and will be removed in version 7. Use getExpectedMocksCollection() instead.
      */
-    protected function getHelpMocksCollection($id)
+    protected function getHelpMocksCollection($key)
     {
-        if (!isset($this->helpMocksCollections[$id])) {
-            throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $id));
+        if (!isset($this->helpMocksCollections[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required mock collection "%s" doesn\'t exist.', $key));
         }
 
-        return $this->helpMocksCollections[$id];
+        @trigger_error('The method addHelpMocksCollection is deprecated and will be removed in version 7. Use addExpectedMocksCollection() instead.', E_USER_DEPRECATED);
+
+        return $this->getExpectedMocksCollection($key);
     }
 
     /**
      * Get a resource to help during testing.
      *
-     * @param $id
+     * @param $key
      *
      * @return mixed
      */
-    protected function getHelpResource($id)
+    protected function getHelpResource($key)
     {
-        if (!isset($this->helpResources[$id])) {
-            throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $id));
+        if (!isset($this->helpResources[$key])) {
+            throw new \InvalidArgumentException(sprintf("The resource \"%s\" you are asking for doesn't exist.", $key));
         }
 
-        return $this->helpResources[$id];
+        return $this->helpResources[$key];
     }
 
     /**
@@ -269,28 +388,28 @@ trait PHPUnitHelper
      * For example, the output of a command, or the crawler object of a request.
      *
      * @return mixed
+     *
+     * @deprecated The method getHelpResult() will be removed in version 7. Use getActualResult() instead.
      */
     protected function getHelpResult()
     {
-        if (null === $this->helpResult) {
-            throw new \LogicException('Before you can call getResult(), you have to set a result with setResult().');
-        }
+        @trigger_error('Before you can call getResult(), you have to set a result with setResult().', E_USER_DEPRECATED);
 
-        return $this->helpResult;
+        return $this->getActualResult();
     }
 
     /**
-     * @param $id
+     * @param $key
      *
      * @return mixed
      */
-    protected function getHelpValue($id)
+    protected function getHelpValue($key)
     {
-        if (!isset($this->helpValues[$id])) {
-            throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $id));
+        if (!isset($this->helpValues[$key])) {
+            throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $key));
         }
 
-        return $this->helpValues[$id];
+        return $this->helpValues[$key];
     }
 
     /**
@@ -305,7 +424,7 @@ trait PHPUnitHelper
      */
     protected function getMockFromMocksCollection($mockName, $collection, $andRemove = false)
     {
-        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
+        if (!isset($this->expectedMocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
         }
 
@@ -313,7 +432,7 @@ trait PHPUnitHelper
             $this->removeMockFromMocksCollection($mockName, $collection);
         }
 
-        return $this->helpMocksCollections[$collection][$mockName];
+        return $this->expectedMocksCollections[$collection][$mockName];
     }
 
     /**
@@ -337,16 +456,16 @@ trait PHPUnitHelper
      */
     protected function removeMockFromMocksCollection($mockName, $collection, $fromExpectedToo = true)
     {
-        if (!isset($this->helpMocksCollections[$collection][$mockName])) {
+        if (!isset($this->expectedMocksCollections[$collection][$mockName])) {
             throw new \InvalidArgumentException(sprintf('The required mock "%s" doesn\'t exist in collection "%s".', $mockName, $collection));
         }
 
-        $return = $this->helpMocksCollections[$collection][$mockName];
-        unset($this->helpMocksCollections[$collection][$mockName]);
+        $return = $this->expectedMocksCollections[$collection][$mockName];
+        unset($this->expectedMocksCollections[$collection][$mockName]);
 
         // Remove also from expected values
-        if (isset($this->areExpected[$collection][$mockName]) && $fromExpectedToo) {
-            unset($this->areExpected[$collection][$mockName]);
+        if (isset($this->expectedValues[$collection][$mockName]) && $fromExpectedToo) {
+            unset($this->expectedValues[$collection][$mockName]);
         }
 
         return $return;
@@ -360,13 +479,36 @@ trait PHPUnitHelper
      * @param $result
      * @param $overwrite bool If false, the result isn't overwritten
      */
-    protected function setHelpResult($result, $overwrite = false)
+    protected function setActualResult($result, $overwrite = false)
     {
-        if (null !== $this->helpResult && false === $overwrite) {
+        if (null !== $this->actualResult && false === $overwrite) {
             throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
         }
 
-        $this->helpResult = $result;
+        @trigger_error('The method setHelpResult() will be removed in version 7. Use setActualResult() instead.', E_USER_DEPRECATED);
+
+        $this->actualResult = $result;
+    }
+
+    /**
+     * The result of the test.
+     *
+     * This not allows method chaining.
+     *
+     * @param $result
+     * @param $overwrite bool If false, the result isn't overwritten
+     *
+     * @deprecated The method setHelpResult() will be removed in version 7. Use setActualResult() instead.
+     */
+    protected function setHelpResult($result, $overwrite = false)
+    {
+        if (null !== $this->actualResult && false === $overwrite) {
+            throw new \LogicException('A result is already set. Set the third parameter to "true" to overwrite it.');
+        }
+
+        @trigger_error('The method setHelpResult() will be removed in version 7. Use setActualResult() instead.', E_USER_DEPRECATED);
+
+        $this->actualResult = $result;
     }
 
     /**
@@ -404,11 +546,11 @@ trait PHPUnitHelper
             unset($refl);
         } else {
             // At least unset the helper properties
-            $this->areExpected = null;
+            $this->expectedValues = null;
             $this->helpMocks = null;
             $this->helpMocksCollections = null;
             $this->helpResources = null;
-            $this->helpResult = null;
+            $this->actualResult = null;
             $this->objectToTest = null;
             $this->helpValues = null;
         }
