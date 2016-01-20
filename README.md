@@ -10,6 +10,8 @@
 
 # SHQ_PHPUnit_Helper
 
+! DOCUMENTATION NOT YET UPDATED !
+
 This helper permits you to tear down your tests in an easy way.
 
 It can also print some info about memory usage before and after tear down.
