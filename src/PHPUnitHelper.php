@@ -19,7 +19,7 @@ trait PHPUnitHelper
 
     /** @var  array Contains the expected collection of mock objects */
     private $expectedMocksCollections = [];
-    
+
     /** @var  array The expected values */
     private $expectedValues = [];
 
@@ -41,10 +41,11 @@ trait PHPUnitHelper
     private $useReflection = false;
     private $memoryAfterTearDown;
     private $memoryBeforeTearDown;
-    
+
     /**
      * @param $key
      * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     *
      * @return $this
      */
     protected function addExpectedMock($key, \PHPUnit_Framework_MockObject_MockObject $mock)
@@ -63,6 +64,7 @@ trait PHPUnitHelper
     /**
      * @param $key
      * @param array $collection
+     *
      * @return $this
      */
     protected function addExpectedMocksCollection($key, array $collection)
@@ -73,8 +75,7 @@ trait PHPUnitHelper
             );
         }
 
-        foreach ($collection as $mock)
-        {
+        foreach ($collection as $mock) {
             if (false === $mock instanceof \PHPUnit_Framework_MockObject_MockObject) {
                 throw new \InvalidArgumentException(
                     sprintf('One of the elements in the mocks collection "%s" is not a mock object.', $key)
@@ -86,7 +87,7 @@ trait PHPUnitHelper
 
         return $this;
     }
-    
+
     /**
      * Add an expected value.
      *
@@ -102,7 +103,7 @@ trait PHPUnitHelper
                 sprintf('The expected value "%s" you are trying to add is already set as mock, mock collection or value.', $key)
             );
         }
-        
+
         if (is_object($value)) {
             throw new \InvalidArgumentException('The expected value you are trying to add is an object. Use addExpectedMock() instead.');
         }
@@ -127,7 +128,7 @@ trait PHPUnitHelper
         if (isset($this->helpMocks[$key])) {
             throw new \LogicException('The help mock you are trying to add is already set.');
         }
-        
+
         $this->helpMocks[$key] = $mock;
 
         return $this;
@@ -136,8 +137,8 @@ trait PHPUnitHelper
     /**
      * Add a resource to help during the test of the class.
      *
-     * @param string $key        The name of the resource
-     * @param mixed  $resource  The resource
+     * @param string $key      The name of the resource
+     * @param mixed  $resource The resource
      *
      * @return $this
      */
@@ -248,6 +249,7 @@ trait PHPUnitHelper
 
     /**
      * @param $key
+     *
      * @return mixed
      */
     protected function getExpectedMock($key)
@@ -261,6 +263,7 @@ trait PHPUnitHelper
 
     /**
      * @param $key
+     *
      * @return mixed
      */
     protected function getExpectedMocksCollection($key)
@@ -274,6 +277,7 @@ trait PHPUnitHelper
 
     /**
      * @param $key
+     *
      * @return mixed
      */
     protected function getExpectedValue($key)
