@@ -10,7 +10,7 @@ namespace SerendipityHQ\Library\PHPUnit_Helper;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
- * A PHPUnit helper to better manage tested resources, mocked objects and test values.
+ * A PHPUnit helper to better manage tested resources, mocked objects, collections of mocks and test values.
  */
 trait PHPUnitHelper
 {
