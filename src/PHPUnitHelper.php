@@ -14,6 +14,9 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 trait PHPUnitHelper
 {
+    /** @var mixed The result of the test */
+    private $actualResult;
+
     /** @var  array The expected mocks */
     private $expectedMocks = [];
 
@@ -29,16 +32,12 @@ trait PHPUnitHelper
     /** @var array Contains the resources used by the test */
     private $helpResources = [];
 
-    /** @var mixed The result of the test */
-    private $actualResult;
+    /** @var array Contains the help values */
+    private $helpValues = [];
 
     /** @var object The tested resource */
     private $objectToTest;
 
-    /** @var array Contains the help values */
-    private $helpValues = [];
-
-    private $useReflection = false;
     private $memoryAfterTearDown;
     private $memoryBeforeTearDown;
 
@@ -428,13 +427,14 @@ trait PHPUnitHelper
     protected function helpTearDown()
     {
         // At least unset the helper properties
+        $this->actualResult = null;
+        $this->expectedMocks = null;
+        $this->expectedMocksCollections = null;
         $this->expectedValues = null;
         $this->helpMocks = null;
-        $this->expectedMocksCollections = null;
         $this->helpResources = null;
-        $this->actualResult = null;
-        $this->objectToTest = null;
         $this->helpValues = null;
+        $this->objectToTest = null;
     }
 
     public function measureMemoryAfterTearDown()
