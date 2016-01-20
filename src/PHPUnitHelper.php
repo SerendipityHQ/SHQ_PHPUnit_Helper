@@ -219,7 +219,7 @@ trait PHPUnitHelper
      *
      * @return $this
      */
-    protected function bindExpectedToObjectToTest()
+    protected function bindExpectedToObject()
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
@@ -244,6 +244,18 @@ trait PHPUnitHelper
         unset($accessor);
 
         return $this;
+    }
+
+    /**
+     * Automatically set the properties of the Resource with expected values.
+     *
+     * @return $this
+     */
+    protected function bindExpectedToObjectToTest()
+    {
+        @trigger_error('bindExpectedToObjectToTest() is deprecated. Use bindExpectedToObject() instead.');
+
+        $this->bindExpectedToObject();
     }
 
     /**
