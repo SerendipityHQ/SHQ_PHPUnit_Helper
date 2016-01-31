@@ -23,6 +23,6 @@
     "require-dev": {
         "codeclimate/php-test-reporter": "dev-master",
         "phpunit/phpunit": "*",
-        "satooshi/php-coveralls": "0.7.*@dev"
+        "satooshi/php-coveralls": "*@dev"
     }
 }
