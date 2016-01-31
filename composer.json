@@ -21,7 +21,8 @@
         "symfony/property-access": "*"
     },
     "require-dev": {
+        "codeclimate/php-test-reporter": "dev-master",
         "phpunit/phpunit": "*",
-        "codeclimate/php-test-reporter": "dev-master"
+        "satooshi/php-coveralls": "0.7.*@dev"
     }
 }
