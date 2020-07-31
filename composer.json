@@ -17,13 +17,10 @@
         }
     },
     "require": {
-        "php": "^5.4|^7.0",
-        "symfony/property-access": "*"
+        "php": "^7.2",
+        "symfony/property-access": "^3.4|^4.4|^5.1"
     },
     "require-dev": {
-        "codeclimate/php-test-reporter": "dev-master",
-        "fabpot/php-cs-fixer": "*",
-        "phpunit/phpunit": "*",
-        "satooshi/php-coveralls": "*@dev"
+        "phpunit/phpunit": "^8"
     }
 }

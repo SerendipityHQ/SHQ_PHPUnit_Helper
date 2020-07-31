@@ -7,6 +7,7 @@
  */
 namespace SerendipityHQ\Library\PHPUnit_Helper;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -43,11 +44,11 @@ trait PHPUnitHelper
 
     /**
      * @param $key
-     * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param MockObject $mock
      *
      * @return $this
      */
-    protected function addExpectedMock($key, \PHPUnit_Framework_MockObject_MockObject $mock)
+    protected function addExpectedMock($key, MockObject $mock)
     {
         if (isset($this->expectedMocks[$key]) || isset($this->expectedMocksCollections[$key]) || isset($this->expectedValues[$key])) {
             throw new \LogicException(
@@ -75,7 +76,7 @@ trait PHPUnitHelper
         }
 
         foreach ($collection as $mock) {
-            if (false === $mock instanceof \PHPUnit_Framework_MockObject_MockObject) {
+            if (false === $mock instanceof MockObject) {
                 throw new \InvalidArgumentException(
                     sprintf('One of the elements in the mocks collection "%s" is not a mock object.', $key)
                 );
@@ -118,11 +119,11 @@ trait PHPUnitHelper
      * Use "Help" for consistency with getHelpMock.
      *
      * @param $key
-     * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param MockObject $mock
      *
      * @return $this
      */
-    protected function addHelpMock($key, \PHPUnit_Framework_MockObject_MockObject $mock)
+    protected function addHelpMock($key, MockObject $mock)
     {
         if (isset($this->helpMocks[$key])) {
             throw new \LogicException('The help mock you are trying to add is already set.');
@@ -214,12 +215,12 @@ trait PHPUnitHelper
     /**
      * Clone a mock object generating a collection populated with mocks of the same kind.
      *
-     * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param MockObject $mock
      * @param int                                      $repeatFor
      *
      * @return array
      */
-    protected function generateMocksCollection(\PHPUnit_Framework_MockObject_MockObject $mock, $repeatFor = 1)
+    protected function generateMocksCollection(MockObject $mock, $repeatFor = 1)
     {
         $collection = [];
 
@@ -293,7 +294,7 @@ trait PHPUnitHelper
      *
      * @param $key
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getHelpMock($key)
     {
@@ -373,7 +374,7 @@ trait PHPUnitHelper
      * @param string $mockName
      * @param string $collection
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function removeMockFromMocksCollection($mockName, $collection)
     {
