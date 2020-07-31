@@ -328,7 +328,7 @@ trait PHPUnitHelper
      */
     protected function getHelpValue($key)
     {
-        if (!isset($this->helpValues[$key])) {
+        if (false === key_exists($key, $this->helpValues)) {
             throw new \InvalidArgumentException(sprintf('The required help value "%s" doesn\'t exist.', $key));
         }
 
